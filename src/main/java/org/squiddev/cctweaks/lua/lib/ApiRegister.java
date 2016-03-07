@@ -8,7 +8,7 @@ import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.lib.socket.SocketAPI;
 
 public class ApiRegister {
-	public void init() {
+	public static void init() {
 		ILuaEnvironment environment = LuaEnvironment.instance;
 		environment.registerAPI(new ILuaAPIFactory() {
 			@Override

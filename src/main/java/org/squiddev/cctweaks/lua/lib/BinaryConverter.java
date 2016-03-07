@@ -76,10 +76,23 @@ public class BinaryConverter {
 	}
 
 	public static String decodeString(byte[] bytes, int offset, int length) {
-		return new String(bytes, offset, length, getCharset());
+		char[] chars = new char[length];
+
+		for (int i = 0; i < chars.length; ++i) {
+			chars[i] = (char) (bytes[offset + i] & 255);
+		}
+
+		return new String(chars);
 	}
 
 	public static byte[] toBytes(String string) {
-		return string.getBytes(getCharset());
+		byte[] chars = new byte[string.length()];
+
+		for(int i = 0; i < chars.length; ++i) {
+			char c = string.charAt(i);
+			chars[i] = c < 256?(byte)c:63;
+		}
+
+		return chars;
 	}
 }

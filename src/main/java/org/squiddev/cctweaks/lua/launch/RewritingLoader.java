@@ -30,7 +30,7 @@ public class RewritingLoader extends URLClassLoader {
 	public RewritingLoader(URL[] urls) {
 		super(urls, null);
 
-		dumpFolder = new File("asm-studio");
+		dumpFolder = new File("asm/cctweaks");
 		if (Config.Testing.dumpAsm && !dumpFolder.exists() && !dumpFolder.mkdirs()) {
 			Logger.warn("Cannot create ASM dump folder");
 		}
@@ -42,9 +42,9 @@ public class RewritingLoader extends URLClassLoader {
 		addClassLoaderExclusion("com.google.common.");
 		addClassLoaderExclusion("org.squiddev.patcher.");
 
-		addClassLoaderExclusion("org.squiddev.studio.api.Transformer");
-		addClassLoaderExclusion("org.squiddev.studio.Config");
-		addClassLoaderExclusion("org.squiddev.studio.launch.");
+		addClassLoaderExclusion("org.squiddev.cctweaks.lua.Config");
+		addClassLoaderExclusion("org.squiddev.cctweaks.lua.launch.");
+		addClassLoaderExclusion("org.squiddev.cctweaks.lua.asm.");
 	}
 
 	@Override
@@ -76,7 +76,16 @@ public class RewritingLoader extends URLClassLoader {
 			byte[] transformed = chain.transform(name, original);
 			if (transformed != original) writeDump(fileName, transformed);
 
-			final CodeSource codeSource = urlConnection == null ? null : new CodeSource(urlConnection.getURL(), signers);
+			CodeSource codeSource = null;
+			if (urlConnection != null) {
+				URL url = urlConnection.getURL();
+				if (urlConnection instanceof JarURLConnection) {
+					url = ((JarURLConnection) urlConnection).getJarFileURL();
+				}
+
+				codeSource = new CodeSource(url, signers);
+			}
+
 			return defineClass(name, transformed, 0, transformed.length, codeSource);
 		} catch (Throwable e) {
 			throw new ClassNotFoundException(name, e);

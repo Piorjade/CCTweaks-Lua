@@ -1,5 +1,5 @@
 group 'org.squiddev'
-version '1.0-SNAPSHOT'
+version '1.0'
 
 apply plugin: 'java'
 
@@ -27,7 +27,7 @@ configurations {
 dependencies {
     compile "ComputerCraft:ComputerCraft:1.78"
     compile 'com.google.guava:guava:19.0'
-    compile "org.ow2.asm:asm-debug-all:5.0.4"
+    shade "org.ow2.asm:asm-debug-all:5.0.4"
 
     shade('org.squiddev:luaj.luajc:1.0.5') {
         // We provide a custom LuaJ source with ComputerCraft
@@ -41,3 +41,21 @@ dependencies {
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
+
+// Build a non-obfuscated jar
+task devJar(type: Jar) {
+	from sourceSets.main.output
+
+	// Package all the org.squiddev dependencies into one file
+	from configurations.shade
+		.collect { it.isDirectory() ? it : zipTree(it) }
+
+	// Package the patch files into a patch/ folder
+	filesMatching("org/luaj/**", {
+		it.path = "patch/" + it.path
+	})
+
+	classifier = 'complete'
+}
+
+assemble.dependsOn += devJar
