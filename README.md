@@ -6,7 +6,7 @@ This is a standalone version of [CCTweaks](https://github.com/SquidDev-CC/CC-Twe
 ## Getting started
  - [Download the latest release](https://github.com/SquidDev-CC/CCTweaks-Lua/releases/latest)
  - Add that and [Guava](https://github.com/google/guava) to your class path
- - Run `java -cp cctweaks.jar:guava.jar  java -Dcctweaks.debug=true -cp org.squiddev.cctweaks.lua.launch.Launcher [actual main class and arguments...]`
+ - Run `java -cp cctweaks.jar:guava.jar org.squiddev.cctweaks.lua.launch.Launcher [actual main class and arguments...]`
  
 This will inject CCTweaks into the class loader, adding modifications.
 
