@@ -3,6 +3,7 @@ package org.squiddev.cctweaks.lua;
 import org.squiddev.cctweaks.lua.lib.socket.AddressMatcher;
 import org.squiddev.configgen.*;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,20 +11,20 @@ import java.util.Set;
 /**
  * The main config class
  */
-// @org.squiddev.configgen.Config(languagePrefix = "gui.config.cctweaks.")
+@org.squiddev.configgen.Config(languagePrefix = "gui.config.cctweaks.")
 public final class Config {
 	public static Set<String> globalWhitelist;
 
 	public static AddressMatcher socketWhitelist;
 	public static AddressMatcher socketBlacklist;
 
-//	public static void init(File file) {
-//		ConfigLoader.init(file);
-//	}
-//
-//	public static void sync() {
-//		ConfigLoader.sync();
-//	}
+	public static void init(File file) {
+		ConfigLoader.init(file);
+	}
+
+	public static void sync() {
+		ConfigLoader.sync();
+	}
 
 	static {
 		onSync();
