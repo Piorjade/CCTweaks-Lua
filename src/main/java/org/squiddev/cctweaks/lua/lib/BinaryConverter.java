@@ -52,27 +52,8 @@ public class BinaryConverter {
 		}
 	}
 
-	private static Charset CHARSET;
-
-	public static Charset getCharset() {
-		if (CHARSET == null) {
-			try {
-				CHARSET = Charset.forName("UTF8");
-			} catch (UnsupportedCharsetException e) {
-				try {
-					// Fall back. Shouldn't happen, but you never know
-					CHARSET = Charset.forName("ISO-8859-1");
-				} catch (UnsupportedCharsetException e1) {
-					CHARSET = Charset.defaultCharset();
-				}
-			}
-		}
-
-		return CHARSET;
-	}
-
 	public static String decodeString(byte[] bytes) {
-		return new String(bytes, getCharset());
+		return decodeString(bytes, 0, bytes.length);
 	}
 
 	public static String decodeString(byte[] bytes, int offset, int length) {

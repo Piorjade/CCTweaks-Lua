@@ -10,9 +10,34 @@ This is a standalone version of [CCTweaks](https://github.com/SquidDev-CC/CC-Twe
  
 This will inject CCTweaks into the class loader, adding modifications.
 
+## Features
+ - Custom computer timeout
+ - Whitelist globals (such as debug)
+ - Fix the binary strings (for fs, http, rednet and os.queueEvent)
+ - TCP socket API (`socket`)
+ - Compression API (`data`)
+ - [LuaJC](https://github.com/SquidDev/luaj.luajc) compiler (compiles Lua code to Java for performance boost)
+ - [Cobalt](https://github.com/SquidDev/Cobalt) VM (reentrant fork of LuaJ)
+ - Return HTTP handle on failures
+ - Allow getting headers from HTTP responses
+ - API for adding custom APIs
+
 ## Tweaking
 Most tweaks are applied by default, though some can be configured through the command line:
  - `-Dcctweaks.debug=true`: Enable the debug API.
  - `-Dcctweaks.luajc=true`: Enable LuaJC compilation (a `luajc.verify` flag also exists).
  - `-Dcctweaks.cobalt=true`: Enable the [Cobalt VM](https://github.com/SquidDev/Cobalt).
  - `-Dcctweaks.timeout=10000`: Set the computer thread timeout. Time is measured in milliseconds.
+
+## CCEmuRedux
+This project is partly aimed at CCEmuRedux and so contains a custom launcher for CCEmuRedux.
+
+ - Place the jar in `.ccemuredux/bin/`
+ - Change directory to `.ccemuredux`
+ - Execute `java -cp "bin/*" org.squiddev.cctweaks.lua.launch.CCEmuRedux`
+
+Several configuration options also exist:
+
+ - `-Dcctweaks.ccemu.width=51`: Manually set the width of all computers
+ - `-Dcctweaks.ccemu.height=19`: Manually set the height of all computers
+
