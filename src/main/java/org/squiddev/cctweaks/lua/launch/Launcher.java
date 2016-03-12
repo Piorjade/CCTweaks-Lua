@@ -30,6 +30,7 @@ public class Launcher {
 		Config.Computer.luaJC = parseBoolean("cctweaks.luajc");
 		Config.Computer.luaJCVerify = parseBoolean("cctweaks.luajc.verify");
 		Config.Computer.cobalt = parseBoolean("cctweaks.cobalt");
+		Config.Computer.timeoutError = parseBoolean("cctweaks.timeoutError");
 
 		String timeout = System.getProperty("cctweaks.timeout");
 		if (timeout != null) Config.Computer.computerThreadTimeout = Integer.parseInt(timeout);

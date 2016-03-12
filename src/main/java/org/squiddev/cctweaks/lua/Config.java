@@ -13,6 +13,8 @@ import java.util.Set;
  */
 @org.squiddev.configgen.Config(languagePrefix = "gui.config.cctweaks.")
 public final class Config {
+	public static String mcVersion = "1.8.9";
+
 	public static Set<String> globalWhitelist;
 
 	public static AddressMatcher socketWhitelist;
@@ -84,6 +86,13 @@ public final class Config {
 		 */
 		@DefaultBoolean(false)
 		public static boolean cobalt;
+
+		/**
+		 * Error much earlier on a timeout.
+		 * Note: This only applies to the Cobalt VM
+		 */
+		@DefaultBoolean(false)
+		public static boolean timeoutError;
 	}
 
 	/**

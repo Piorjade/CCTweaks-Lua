@@ -7,6 +7,7 @@ import dan200.computercraft.api.lua.ILuaTask;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.apis.ILuaAPI;
 import dan200.computercraft.core.computer.Computer;
+import dan200.computercraft.core.computer.IComputerEnvironment;
 import dan200.computercraft.core.computer.ITask;
 import dan200.computercraft.core.computer.MainThread;
 import dan200.computercraft.core.lua.ILuaMachine;
@@ -20,10 +21,13 @@ import org.squiddev.cobalt.function.LuaFunction;
 import org.squiddev.cobalt.function.VarArgFunction;
 import org.squiddev.cobalt.lib.*;
 import org.squiddev.cobalt.lib.platform.AbstractResourceManipulator;
+import org.squiddev.patcher.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -45,6 +49,18 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		"print"
 	};
 
+	private static final Method getHost;
+
+	static {
+		Method host = null;
+		try {
+			host = IComputerEnvironment.class.getMethod("getHostString");
+		} catch (NoSuchMethodException ignored) {
+		}
+
+		getHost = host;
+	}
+
 	private final Computer computer;
 	private final LuaState state;
 	private final LuaTable globals;
@@ -65,15 +81,43 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		});
 
 		state.debug = new DebugHandler(state) {
-			int count = 0;
+			private int count = 0;
+			private boolean hasSoftAbort;
 
 			@Override
 			public void onInstruction(DebugState ds, DebugInfo di, int pc, Varargs extras, int top) {
-				if (++count > 100000) {
+				int count = ++this.count;
+				if (count > 100000) {
 					if (hardAbort != null) LuaThread.yield(state, NONE);
-					count = 0;
+					this.count = 0;
+				} else if (Config.Computer.timeoutError) {
+					handleSoftAbort();
 				}
+
 				super.onInstruction(ds, di, pc, extras, top);
+			}
+
+			@Override
+			public void poll() {
+				if (hardAbort != null) LuaThread.yield(state, NONE);
+				if (Config.Computer.timeoutError) handleSoftAbort();
+			}
+
+			public void handleSoftAbort() {
+				// If the soft abort has been cleared then we can reset our flags and continue.
+				String message = softAbort;
+				if (message == null) {
+					hasSoftAbort = false;
+					return;
+				}
+
+				if (hasSoftAbort && hardAbort == null) {
+					// If we have been soft aborted but not hard aborted then everything is OK.
+					return;
+				}
+
+				hasSoftAbort = true;
+				throw new LuaError(message);
 			}
 		};
 
@@ -87,7 +131,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		globals.load(state, new MathLib());
 		globals.load(state, new CoroutineLib());
 
-		if (!Config.globalWhitelist.contains("debug")) {
+		if (Config.globalWhitelist.contains("debug")) {
 			globals.load(state, new DebugLib());
 		}
 
@@ -95,11 +139,19 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			if (!Config.globalWhitelist.contains(global)) globals.rawset(global, Constants.NIL);
 		}
 
-		// TODO: Move to Cobalt
-		globals.rawset("_VERSION", valueOf("Lua 5.1"));
+		if (getHost != null) {
+			try {
+				// We have to use reflection for different CC versions
+				globals.rawset("_HOST", valueOf((String) getHost.invoke(computer.getAPIEnvironment().getComputerEnvironment())));
+			} catch (InvocationTargetException e) {
+				Logger.error("Cannot find getHostString", e);
+			} catch (IllegalAccessException e) {
+				Logger.error("Cannot find getHostString", e);
+			}
+		}
 
 		globals.rawset("_CC_VERSION", valueOf(ComputerCraft.getVersion()));
-		globals.rawset("_MC_VERSION", valueOf("${mc_version}"));
+		globals.rawset("_MC_VERSION", valueOf(Config.mcVersion));
 		globals.rawset("_LUAJ_VERSION", valueOf("Cobalt 0.1"));
 		if (ComputerCraft.disable_lua51_features) {
 			globals.rawset("_CC_DISABLE_LUA51_FEATURES", Constants.TRUE);
@@ -221,11 +273,13 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			result.rawset(methods[i], new VarArgFunction() {
 				@Override
 				public Varargs invoke(LuaState state, Varargs args) {
-					String message = softAbort;
-					if (message != null) {
-						softAbort = null;
-						hardAbort = null;
-						throw new LuaError(message);
+					if (!Config.Computer.timeoutError) {
+						String message = softAbort;
+						if (message != null) {
+							softAbort = null;
+							hardAbort = null;
+							throw new LuaError(message);
+						}
 					}
 
 					try {

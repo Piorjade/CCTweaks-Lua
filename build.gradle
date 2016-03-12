@@ -40,7 +40,7 @@ dependencies {
 	}
 
 	shade 'org.squiddev:Patcher:1.1.1.1'
-	shade 'org.squiddev:Cobalt:0.1.1'
+	shade 'org.squiddev:Cobalt:0.1.2'
 
 	compile 'org.squiddev:ConfigGen:1.1'
 
