@@ -1,6 +1,5 @@
 package org.squiddev.cctweaks.lua.lib;
 
-import com.google.common.base.Strings;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.ILuaObject;
 import dan200.computercraft.api.lua.LuaException;
@@ -38,7 +37,7 @@ public class LuaHelpers {
 	 */
 	public static LuaException rewriteException(Throwable e, String def) {
 		String message = e.getMessage();
-		return new LuaException(Strings.isNullOrEmpty(message) ? def : message);
+		return new LuaException((message == null || message.isEmpty()) ? def : message);
 	}
 
 	public static ILuaMachine createMachine(Computer computer) {

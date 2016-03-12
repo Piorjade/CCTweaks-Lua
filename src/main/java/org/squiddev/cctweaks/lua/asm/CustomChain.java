@@ -1,6 +1,6 @@
 package org.squiddev.cctweaks.lua.asm;
 
-import com.google.common.io.ByteStreams;
+import org.squiddev.cctweaks.lua.StreamHelpers;
 import org.squiddev.patcher.Logger;
 import org.squiddev.patcher.transformer.TransformationChain;
 
@@ -21,8 +21,7 @@ public class CustomChain extends TransformationChain {
 
 				InputStream stream = CustomChain.class.getClassLoader().getResourceAsStream(source);
 				if (stream != null) {
-					// TODO: Remove Guava dependency
-					bytes = ByteStreams.toByteArray(stream);
+					bytes = StreamHelpers.toByteArray(stream);
 					break;
 				} else {
 					Logger.warn("Cannot find custom rewrite " + source);

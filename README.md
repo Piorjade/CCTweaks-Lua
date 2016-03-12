@@ -18,6 +18,8 @@ This will inject CCTweaks into the class loader, adding modifications.
  - Compression API (`data`)
  - [LuaJC](https://github.com/SquidDev/luaj.luajc) compiler (compiles Lua code to Java for performance boost)
  - [Cobalt](https://github.com/SquidDev/Cobalt) VM (reentrant fork of LuaJ)
+   - Custom termination handler
+   - Several bugs fixed (any object error messages, string pattern matching, number format strings)
  - Return HTTP handle on failures
  - Allow getting headers from HTTP responses
  - API for adding custom APIs
@@ -27,7 +29,8 @@ Most tweaks are applied by default, though some can be configured through the co
  - `-Dcctweaks.debug=true`: Enable the debug API.
  - `-Dcctweaks.luajc=true`: Enable LuaJC compilation (a `luajc.verify` flag also exists).
  - `-Dcctweaks.cobalt=true`: Enable the [Cobalt VM](https://github.com/SquidDev/Cobalt).
- - `-Dcctweaks.timeout=10000`: Set the computer thread timeout. Time is measured in milliseconds.
+ - `-Dcctweaks.timeout=7000`: Set the computer thread timeout. Time is measured in milliseconds.
+ - `-Dcctweaks.timeoutError=true`: Enable timeouts anywhere, rather than just from CC functions.
 
 ## CCEmuRedux
 This project is partly aimed at CCEmuRedux and so contains a custom launcher for CCEmuRedux.

@@ -1,7 +1,7 @@
 package org.squiddev.cctweaks.lua.launch;
 
-import com.google.common.io.ByteStreams;
 import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.StreamHelpers;
 import org.squiddev.cctweaks.lua.asm.CustomChain;
 import org.squiddev.patcher.Logger;
 
@@ -39,10 +39,10 @@ public class RewritingLoader extends URLClassLoader {
 		addClassLoaderExclusion("java.");
 		addClassLoaderExclusion("sun.");
 		addClassLoaderExclusion("org.objectweb.asm.");
-		addClassLoaderExclusion("com.google.common.");
 		addClassLoaderExclusion("org.squiddev.patcher.");
 
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.Config");
+		addClassLoaderExclusion("org.squiddev.cctweaks.lua.StreamHelpers");
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.launch.");
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.asm.");
 	}
@@ -116,7 +116,7 @@ public class RewritingLoader extends URLClassLoader {
 			if (classResource == null) return null;
 
 			classStream = classResource.openStream();
-			return ByteStreams.toByteArray(classStream);
+			return StreamHelpers.toByteArray(classStream);
 		} finally {
 			if (classStream != null) {
 				try {

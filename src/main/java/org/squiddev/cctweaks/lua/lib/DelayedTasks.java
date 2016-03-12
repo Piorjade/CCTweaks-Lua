@@ -1,6 +1,5 @@
 package org.squiddev.cctweaks.lua.lib;
 
-import com.google.common.base.Preconditions;
 import dan200.computercraft.api.lua.ILuaTask;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -50,8 +49,8 @@ public class DelayedTasks {
 	}
 
 	public static boolean addTask(IComputerAccess access, ILuaTask task, int delay, long id) {
-		Preconditions.checkNotNull(access, "access cannot be null");
-		Preconditions.checkNotNull(task, "task cannot be null");
+		if (access == null) throw new NullPointerException("access cannot be null");
+		if (task == null) throw new NullPointerException("task cannot be null");
 		if (delay < 0) throw new IllegalArgumentException("delay must be >= 0");
 
 		return addTask(new LuaTask(access, task, delay, id));
