@@ -14,8 +14,9 @@ import dan200.computercraft.core.lua.ILuaMachine;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cobalt.*;
+import org.squiddev.cobalt.compiler.LoadState;
 import org.squiddev.cobalt.debug.DebugHandler;
-import org.squiddev.cobalt.debug.DebugInfo;
+import org.squiddev.cobalt.debug.DebugFrame;
 import org.squiddev.cobalt.debug.DebugState;
 import org.squiddev.cobalt.function.LuaFunction;
 import org.squiddev.cobalt.function.VarArgFunction;
@@ -85,7 +86,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			private boolean hasSoftAbort;
 
 			@Override
-			public void onInstruction(DebugState ds, DebugInfo di, int pc, Varargs extras, int top) {
+			public void onInstruction(DebugState ds, DebugFrame di, int pc, Varargs extras, int top) {
 				int count = ++this.count;
 				if (count > 100000) {
 					if (hardAbort != null) LuaThread.yield(state, NONE);
