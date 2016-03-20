@@ -132,12 +132,12 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		globals.load(state, new MathLib());
 		globals.load(state, new CoroutineLib());
 
-		if (Config.globalWhitelist.contains("debug")) {
+		if (Config.Computer.debug) {
 			globals.load(state, new DebugLib());
 		}
 
 		for (String global : ILLEGAL_NAMES) {
-			if (!Config.globalWhitelist.contains(global)) globals.rawset(global, Constants.NIL);
+			globals.rawset(global, Constants.NIL);
 		}
 
 		if (getHost != null) {

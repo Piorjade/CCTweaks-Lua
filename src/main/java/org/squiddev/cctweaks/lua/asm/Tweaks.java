@@ -15,7 +15,7 @@ public class Tweaks {
 		chain.add(new CustomMachine());
 		chain.add(new CustomTimeout());
 		chain.add(new InjectLuaJC());
-		chain.add(new WhitelistGlobals());
+		chain.add(new WhitelistDebug());
 		BinaryUtils.inject(chain);
 	}
 }

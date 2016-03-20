@@ -1,6 +1,6 @@
 package org.squiddev.cctweaks.lua.launch;
 
-import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.ConfigPropertyLoader;
 import org.squiddev.cctweaks.lua.asm.Tweaks;
 
 import java.net.URLClassLoader;
@@ -23,19 +23,7 @@ public class Launcher {
 	}
 
 	public static void setupConfig() {
-		if (parseBoolean("cctweaks.debug")) {
-			Config.Computer.globalWhitelist = new String[]{"debug"};
-		}
-
-		Config.Computer.luaJC = parseBoolean("cctweaks.luajc");
-		Config.Computer.luaJCVerify = parseBoolean("cctweaks.luajc.verify");
-		Config.Computer.cobalt = parseBoolean("cctweaks.cobalt");
-		Config.Computer.timeoutError = parseBoolean("cctweaks.timeoutError");
-
-		String timeout = System.getProperty("cctweaks.timeout");
-		if (timeout != null) Config.Computer.computerThreadTimeout = Integer.parseInt(timeout);
-
-		Config.onSync();
+		ConfigPropertyLoader.init();
 	}
 
 	public static RewritingLoader setupLoader() {
@@ -57,7 +45,7 @@ public class Launcher {
 			.invoke(null, new Object[]{arguments});
 	}
 
-	private static boolean parseBoolean(String name) {
+	public static boolean parseBoolean(String name) {
 		String value = System.getProperty(name);
 		return value != null && Boolean.parseBoolean(value);
 	}

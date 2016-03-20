@@ -3,54 +3,24 @@ package org.squiddev.cctweaks.lua;
 import org.squiddev.cctweaks.lua.lib.socket.AddressMatcher;
 import org.squiddev.configgen.*;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * The main config class
  */
-@org.squiddev.configgen.Config(languagePrefix = "gui.config.cctweaks.")
+@org.squiddev.configgen.Config(languagePrefix = "gui.config.cctweaks.", propertyPrefix = "cctweaks")
 public final class Config {
 	public static String mcVersion = "1.8.9";
-
-	public static Set<String> globalWhitelist;
-
-	public static AddressMatcher socketWhitelist;
-	public static AddressMatcher socketBlacklist;
-
-	public static void init(File file) {
-		ConfigLoader.init(file);
-	}
-
-	public static void sync() {
-		ConfigLoader.sync();
-	}
-
-	static {
-		onSync();
-	}
-
-	@OnSync
-	public static void onSync() {
-		// Handle generation of HashSets, etc...
-		globalWhitelist = new HashSet<String>(Arrays.asList(Computer.globalWhitelist));
-
-		socketWhitelist = new AddressMatcher(APIs.Socket.whitelist);
-		socketBlacklist = new AddressMatcher(APIs.Socket.blacklist);
-	}
 
 	/**
 	 * Computer tweaks and items.
 	 */
 	public static final class Computer {
 		/**
-		 * Globals to whitelist (are not set to nil).
+		 * Enable the debug API.
 		 * This is NOT recommended for servers, use at your own risk.
+		 * It should be save on servers if using Cobalt though.
 		 */
 		@RequiresRestart(mc = false, world = true)
-		public static String[] globalWhitelist = new String[0];
+		public static boolean debug;
 
 		/**
 		 * Time in milliseconds before 'Too long without yielding' errors.
@@ -59,7 +29,7 @@ public final class Config {
 		 */
 		@DefaultInt(7000)
 		@Range(min = 0)
-		public static int computerThreadTimeout = 7000;
+		public static int computerThreadTimeout;
 
 		/**
 		 * Compile Lua bytecode to Java bytecode.
@@ -110,7 +80,7 @@ public final class Config {
 			 */
 			@DefaultBoolean(true)
 			@RequiresRestart(mc = false, world = true)
-			public static boolean enabled = true;
+			public static boolean enabled;
 
 			/**
 			 * Blacklisted domain names.
@@ -122,21 +92,21 @@ public final class Config {
 			 * to the resolved addresses.
 			 */
 			@DefaultString({"127.0.0.0/8", "10.0.0.0/8", "192.168.0.0/16", "172.16.0.0/12"})
-			public static String[] blacklist = new String[]{"127.0.0.0/8", "10.0.0.0/8", "192.168.0.0/16", "172.16.0.0/12"};
+			public static AddressMatcher blacklist;
 
 			/**
 			 * Whitelisted domain names.
 			 * If something is mentioned in both the blacklist and whitelist then
 			 * the blacklist takes priority.
 			 */
-			public static String[] whitelist = new String[0];
+			public static AddressMatcher whitelist;
 
 			/**
 			 * Maximum TCP connections a computer can have at any time
 			 */
 			@DefaultInt(4)
 			@Range(min = 1)
-			public static int maxTcpConnections = 4;
+			public static int maxTcpConnections;
 
 			/**
 			 * Number of threads to use for processing name lookups.
@@ -144,7 +114,7 @@ public final class Config {
 			@DefaultInt(4)
 			@Range(min = 1)
 			@RequiresRestart
-			public static int threads = 4;
+			public static int threads;
 
 			/**
 			 * Maximum number of characters to read from a socket.
@@ -163,14 +133,14 @@ public final class Config {
 			 */
 			@DefaultBoolean(true)
 			@RequiresRestart(mc = false, world = true)
-			public static boolean enabled = true;
+			public static boolean enabled;
 
 			/**
 			 * Maximum number of bytes to process.
 			 * The default is 1MiB
 			 */
 			@DefaultInt(1048576)
-			public static int limit = 1048576;
+			public static int limit;
 		}
 	}
 

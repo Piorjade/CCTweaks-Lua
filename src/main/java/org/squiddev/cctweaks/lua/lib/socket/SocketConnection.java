@@ -61,11 +61,11 @@ public class SocketConnection implements ILuaObjectWithArguments {
 			@Override
 			public InetAddress call() throws Exception {
 				InetAddress resolved = InetAddress.getByName(uri.getHost());
-				if (Config.socketBlacklist.active && Config.socketBlacklist.matches(resolved, uri.getHost())) {
+				if (Config.APIs.Socket.blacklist.active && Config.APIs.Socket.blacklist.matches(resolved, uri.getHost())) {
 					throw new LuaException("Address is blacklisted");
 				}
 
-				if (Config.socketWhitelist.active && !Config.socketWhitelist.matches(resolved, uri.getHost())) {
+				if (Config.APIs.Socket.whitelist.active && !Config.APIs.Socket.whitelist.matches(resolved, uri.getHost())) {
 					throw new LuaException("Address is not whitelisted");
 				}
 

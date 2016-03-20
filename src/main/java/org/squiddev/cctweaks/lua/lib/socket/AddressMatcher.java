@@ -96,4 +96,14 @@ public class AddressMatcher {
 
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return "AddressMatcher{" +
+			"hosts=" + hosts +
+			", addresses=" + addresses +
+			", ranges=" + ranges +
+			", active=" + active +
+			'}';
+	}
 }
