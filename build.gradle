@@ -1,7 +1,11 @@
+plugins {
+	id "com.jfrog.bintray" version "1.4"
+}
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
 group 'org.squiddev'
 version '1.0.2'
-
-apply plugin: 'java'
 
 sourceCompatibility = 1.6
 
@@ -64,3 +68,41 @@ task devJar(type: Jar) {
 }
 
 assemble.dependsOn += devJar
+
+bintray {
+	user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+	key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+	publications = ['mavenJava']
+	pkg {
+		repo = 'maven'
+		name = 'cctweaks-lua'
+		licenses = ['MIT']
+		vcsUrl = 'https://github.com/SquidDev-CC/CCTweaks-Lua'
+
+		version {
+			name = project.version
+			desc = 'Standalone modifications to ComputerCraft'
+			released = new Date()
+		}
+	}
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourcesJar
+		}
+	}
+}
+
+gradle.projectsEvaluated {
+	tasks.withType(JavaCompile) {
+		options.compilerArgs << "-Xlint"
+	}
+}
