@@ -40,6 +40,16 @@ public class LuaHelpers {
 		return new LuaException((message == null || message.isEmpty()) ? def : message);
 	}
 
+	/**
+	 * Wraps an exception, including its type
+	 *
+	 * @param e The exception to wrap
+	 * @return The created exception
+	 */
+	public static LuaException rewriteWholeException(Throwable e) {
+		return e instanceof LuaException ? (LuaException) e : new LuaException(e.toString());
+	}
+
 	public static ILuaMachine createMachine(Computer computer) {
 		if (Config.Computer.cobalt) {
 			return new CobaltMachine(computer);

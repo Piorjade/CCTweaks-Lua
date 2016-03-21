@@ -21,7 +21,6 @@ public class CCEmuRedux {
 		Integer width = parseNumber("cctweaks.ccemu.width");
 		Integer height = parseNumber("cctweaks.ccemu.height");
 
-		setupConfig();
 		RewritingLoader loader = setupLoader();
 
 		if (width != null || height != null) {

@@ -1,6 +1,5 @@
 package org.squiddev.cctweaks.lua.launch;
 
-import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.StreamHelpers;
 import org.squiddev.cctweaks.lua.asm.CustomChain;
 import org.squiddev.patcher.Logger;
@@ -25,15 +24,11 @@ public class RewritingLoader extends URLClassLoader {
 	public final CustomChain chain = new CustomChain();
 
 	private Set<String> classLoaderExceptions = new HashSet<String>();
-	private final File dumpFolder;
+	private final File dumpFolder = new File("asm/cctweaks");
+	private boolean dumpAsm;
 
 	public RewritingLoader(URL[] urls) {
 		super(urls, null);
-
-		dumpFolder = new File("asm/cctweaks");
-		if (Config.Testing.dumpAsm && !dumpFolder.exists() && !dumpFolder.mkdirs()) {
-			Logger.warn("Cannot create ASM dump folder");
-		}
 
 		// classloader exclusions
 		addClassLoaderExclusion("java.");
@@ -41,7 +36,6 @@ public class RewritingLoader extends URLClassLoader {
 		addClassLoaderExclusion("org.objectweb.asm.");
 		addClassLoaderExclusion("org.squiddev.patcher.");
 
-		addClassLoaderExclusion("org.squiddev.cctweaks.lua.Config");
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.StreamHelpers");
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.launch.");
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.asm.");
@@ -109,6 +103,16 @@ public class RewritingLoader extends URLClassLoader {
 		classLoaderExceptions.add(toExclude);
 	}
 
+	public void loadConfig() throws Exception {
+		loadClass("org.squiddev.cctweaks.lua.ConfigPropertyLoader")
+			.getMethod("init")
+			.invoke(null);
+
+		dumpAsm = (Boolean) loadClass("org.squiddev.cctweaks.lua.Config$Testing")
+			.getField("dumpAsm")
+			.get(null);
+	}
+
 	public byte[] getClassBytes(String name) throws IOException {
 		InputStream classStream = null;
 		try {
@@ -128,7 +132,7 @@ public class RewritingLoader extends URLClassLoader {
 	}
 
 	public void writeDump(String fileName, byte[] bytes) {
-		if (Config.Testing.dumpAsm) {
+		if (dumpAsm) {
 			File file = new File(dumpFolder, fileName);
 			File directory = file.getParentFile();
 			if (directory.exists() || directory.mkdirs()) {

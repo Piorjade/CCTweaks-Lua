@@ -57,7 +57,6 @@ public class SocketConnection implements ILuaObjectWithArguments {
 		channel = SocketChannel.open();
 		channel.configureBlocking(false);
 		address = threads.submit(new Callable<InetAddress>() {
-
 			@Override
 			public InetAddress call() throws Exception {
 				InetAddress resolved = InetAddress.getByName(uri.getHost());
@@ -101,7 +100,7 @@ public class SocketConnection implements ILuaObjectWithArguments {
 				try {
 					address.get();
 				} catch (ExecutionException e) {
-					throw LuaHelpers.rewriteException(e.getCause(), "Socket error");
+					throw LuaHelpers.rewriteWholeException(e);
 				}
 				isResolved = true;
 				return channel.finishConnect();

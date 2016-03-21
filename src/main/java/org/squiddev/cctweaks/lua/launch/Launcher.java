@@ -1,6 +1,5 @@
 package org.squiddev.cctweaks.lua.launch;
 
-import org.squiddev.cctweaks.lua.ConfigPropertyLoader;
 import org.squiddev.cctweaks.lua.asm.Tweaks;
 
 import java.net.URLClassLoader;
@@ -16,20 +15,17 @@ public class Launcher {
 			System.exit(1);
 		}
 
-		setupConfig();
 		RewritingLoader loader = setupLoader();
 		loader.chain.finalise();
 		execute(loader, args[0], Arrays.copyOfRange(args, 1, args.length));
 	}
 
-	public static void setupConfig() {
-		ConfigPropertyLoader.init();
-	}
-
-	public static RewritingLoader setupLoader() {
+	public static RewritingLoader setupLoader() throws Exception {
 		URLClassLoader current = (URLClassLoader) ClassLoader.getSystemClassLoader();
 		RewritingLoader classLoader = new RewritingLoader(current.getURLs());
 		Thread.currentThread().setContextClassLoader(classLoader);
+
+		classLoader.loadConfig();
 
 		Tweaks.setup(classLoader.chain);
 		return classLoader;
