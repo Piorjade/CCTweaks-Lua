@@ -1,15 +1,14 @@
 package org.squiddev.cctweaks.lua.patcher;
 
 import org.junit.Test;
-import org.squiddev.cctweaks.lua.Config;
-import org.squiddev.cctweaks.lua.asm.WhitelistDebug;
+import org.squiddev.cctweaks.lua.launch.RewritingLoader;
 
 public class WhitelistDebugTest {
 	@Test
 	public void assertWorks() throws Throwable {
-		RewriteClassLoader loader = new RewriteClassLoader(new WhitelistDebug());
-		Config.Computer.debug = true;
+		System.setProperty("cctweaks.Computer.debug", "true");
 
-		loader.run("assert.assert(debug, 'Expected debug API')");
+		RewritingLoader loader = VersionHandler.getLoader("1.78");
+		VersionHandler.run(loader, "assert.assert(debug, 'Expected debug API')");
 	}
 }

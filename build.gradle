@@ -51,8 +51,29 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
+def versions = [
+	('1.79'): 'http://addons-origin.cursecdn.com/files/2284/638/ComputerCraft1.79pr1.jar',
+	('1.78'): 'http://addons-origin.cursecdn.com/files/2275/878/ComputerCraft1.78.jar',
+	('1.75'): 'http://addons-origin.cursecdn.com/files/2269/339/ComputerCraft1.75.jar',
+]
+
+task getVersions(type: Task) {
+	versions.each { key, value ->
+		def f = file('lib/ComputerCraft-' + key + '.jar')
+		if(!f.exists()) {
+			f.parentFile.mkdirs();
+
+			new URL(value).withInputStream {
+				i -> f.withOutputStream { it << i }
+			}
+		}
+	}
+}
+
+compileTestJava.dependsOn getVersions
+
 // Build a non-obfuscated jar
-task devJar(type: Jar) {
+task combineJar(type: Jar) {
 	from sourceSets.main.output
 
 	// Package all the org.squiddev dependencies into one file
@@ -67,7 +88,7 @@ task devJar(type: Jar) {
 	classifier = 'complete'
 }
 
-assemble.dependsOn += devJar
+assemble.dependsOn += combineJar
 
 bintray {
 	user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
@@ -104,5 +125,11 @@ publishing {
 gradle.projectsEvaluated {
 	tasks.withType(JavaCompile) {
 		options.compilerArgs << "-Xlint"
+	}
+}
+
+test {
+	testLogging {
+		events "passed", "skipped", "failed", "standardOut", "standardError"
 	}
 }
