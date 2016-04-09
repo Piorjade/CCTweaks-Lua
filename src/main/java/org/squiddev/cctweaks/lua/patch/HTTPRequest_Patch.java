@@ -86,6 +86,12 @@ public class HTTPRequest_Patch {
 							connection.setRequestMethod("GET");
 						}
 
+						connection.setRequestProperty("accept-charset", "UTF-8");
+						if(postText != null) {
+							connection.setRequestProperty("content-type", "application/x-www-form-urlencoded; charset=utf-8");
+							connection.setRequestProperty("content-encoding", "UTF-8");
+						}
+
 						if (headers != null) {
 							for (Map.Entry<String, String> header : headers.entrySet()) {
 								connection.setRequestProperty(header.getKey(), header.getValue());
