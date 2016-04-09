@@ -94,7 +94,6 @@ public final class BinaryUtils {
 
 		// HTTP rewrite
 		chain.add(new ClassMerger("dan200.computercraft.core.apis.HTTPAPI", "org.squiddev.cctweaks.lua.patch.HTTPAPI_Patch"));
-		chain.add(new ClassMerger("dan200.computercraft.core.apis.HTTPRequest", "org.squiddev.cctweaks.lua.patch.HTTPRequest_Patch"));
 
 		// FS handle rewrites
 		chain.add(new ClassMerger(BinaryFS.READER_OBJECT, BinaryFS.READER_OBJECT));

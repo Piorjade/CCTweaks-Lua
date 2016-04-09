@@ -1,8 +1,8 @@
-package org.squiddev.cctweaks.lua.patch;
+package org.squiddev.cctweaks.lua.lib;
 
 import dan200.computercraft.ComputerCraft;
-import org.squiddev.cctweaks.lua.lib.HTTPResponse;
-import org.squiddev.patcher.visitors.MergeVisitor;
+import dan200.computercraft.api.lua.LuaException;
+import org.squiddev.patcher.Logger;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -13,31 +13,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-@MergeVisitor.Rename(
-	from = "org/squiddev/cctweaks/lua/patch/HTTPRequest_Patch$HTTPRequestException",
-	to = "dan200/computercraft/core/apis/HTTPRequestException"
-)
-@MergeVisitor.Rewrite
-public class HTTPRequest_Patch {
-	@MergeVisitor.Stub
-	public static class HTTPRequestException extends Exception {
-		private static final long serialVersionUID = 1626499674233098258L;
-
-		public HTTPRequestException(String s) {
-			super(s);
-		}
-	}
-
-	public static URL checkURL(String urlString) throws HTTPRequestException {
+public class HTTPRequest {
+	public static URL checkURL(String urlString) throws LuaException {
 		URL url;
 		try {
 			url = new URL(urlString);
 		} catch (MalformedURLException e) {
-			throw new HTTPRequestException("URL malformed");
+			throw new LuaException("URL malformed");
 		}
 
 		String protocol = url.getProtocol().toLowerCase();
-		if (!protocol.equals("http") && !protocol.equals("https")) throw new HTTPRequestException("URL not http");
+		if (!protocol.equals("http") && !protocol.equals("https")) throw new LuaException("URL not http");
 
 		boolean allowed = false;
 		String whitelistString = ComputerCraft.http_whitelist;
@@ -50,7 +36,7 @@ public class HTTPRequest_Patch {
 			}
 		}
 
-		if (!allowed) throw new HTTPRequestException("Domain not permitted");
+		if (!allowed) throw new LuaException("Domain not permitted");
 
 		return url;
 	}
@@ -65,29 +51,41 @@ public class HTTPRequest_Patch {
 	private int responseCode = -1;
 	private Map<String, Map<Integer, String>> responseHeaders;
 
-	public HTTPRequest_Patch(String url, final String postText, final Map<String, String> headers) throws HTTPRequestException {
+	private static final String[] methods = {
+		"GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE"
+	};
+
+	private static boolean checkMethod(String verb) {
+		for (String method : methods) {
+			if (verb.equals(method)) return true;
+		}
+
+		return false;
+	}
+
+	public HTTPRequest(final String url, final String postText, final Map<String, String> headers, final String verb) throws LuaException {
 		urlString = url;
 		this.url = checkURL(url);
 
-		Thread thread = new Thread(new Runnable() {
-			@MergeVisitor.Rewrite
-			protected boolean ANNOTATION;
+		if (verb != null && !checkMethod(verb)) throw new LuaException("No such verb: " + verb);
 
+		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					HttpURLConnection connection = (HttpURLConnection) HTTPRequest_Patch.this.url.openConnection();
+					HttpURLConnection connection = (HttpURLConnection) HTTPRequest.this.url.openConnection();
 
 					{ // Setup connection
-						if (postText != null) {
+						if (verb != null) {
+							connection.setRequestMethod(verb);
+						} else if (postText != null) {
 							connection.setRequestMethod("POST");
-							connection.setDoOutput(true);
 						} else {
 							connection.setRequestMethod("GET");
 						}
 
 						connection.setRequestProperty("accept-charset", "UTF-8");
-						if(postText != null) {
+						if (postText != null) {
 							connection.setRequestProperty("content-type", "application/x-www-form-urlencoded; charset=utf-8");
 							connection.setRequestProperty("content-encoding", "UTF-8");
 						}
@@ -99,6 +97,7 @@ public class HTTPRequest_Patch {
 						}
 
 						if (postText != null) {
+							connection.setDoOutput(true);
 							OutputStream os = connection.getOutputStream();
 							OutputStreamWriter osr = new OutputStreamWriter(os);
 							BufferedWriter writer = new BufferedWriter(osr);
@@ -160,6 +159,13 @@ public class HTTPRequest_Patch {
 
 					connection.disconnect();
 				} catch (IOException e) {
+					synchronized (lock) {
+						complete = true;
+						success = false;
+						result = null;
+					}
+				} catch (Exception e) {
+					Logger.error("Unknown exception fetching " + url, e);
 					synchronized (lock) {
 						complete = true;
 						success = false;
