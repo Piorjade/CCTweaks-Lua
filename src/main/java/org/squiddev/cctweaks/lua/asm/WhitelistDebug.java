@@ -31,7 +31,7 @@ public class WhitelistDebug implements IPatcher {
 			public void handle(InsnList nodes, MethodVisitor visitor) {
 				Label blacklistLabel = new Label();
 
-				visitor.visitFieldInsn(GETSTATIC, "org/squiddev/cctweaks/lua/Config$Computer", "debug", "Z");
+				visitor.visitFieldInsn(GETSTATIC, "org/squiddev/cctweaks/lua/Config$APIs", "debug", "Z");
 				visitor.visitJumpInsn(IFNE, blacklistLabel);
 
 				nodes.accept(visitor);

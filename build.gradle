@@ -5,7 +5,7 @@ apply plugin: 'java'
 apply plugin: 'maven-publish'
 
 group 'org.squiddev'
-version '1.0.3'
+version '1.0.4'
 
 sourceCompatibility = 1.6
 
@@ -44,7 +44,7 @@ dependencies {
 	}
 
 	shade 'org.squiddev:Patcher:1.1.1.1'
-	shade 'org.squiddev:Cobalt:0.1.4'
+	shade 'org.squiddev:Cobalt:0.1.7'
 
 	compile 'org.squiddev:ConfigGen:1.2.4'
 

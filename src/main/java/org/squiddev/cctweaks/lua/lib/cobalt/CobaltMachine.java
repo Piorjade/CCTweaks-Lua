@@ -15,13 +15,15 @@ import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cobalt.*;
 import org.squiddev.cobalt.compiler.LoadState;
-import org.squiddev.cobalt.debug.DebugHandler;
 import org.squiddev.cobalt.debug.DebugFrame;
+import org.squiddev.cobalt.debug.DebugHandler;
 import org.squiddev.cobalt.debug.DebugState;
+import org.squiddev.cobalt.function.LibFunction;
 import org.squiddev.cobalt.function.LuaFunction;
 import org.squiddev.cobalt.function.VarArgFunction;
 import org.squiddev.cobalt.lib.*;
 import org.squiddev.cobalt.lib.platform.AbstractResourceManipulator;
+import org.squiddev.cobalt.lib.profiler.ProfilerLib;
 import org.squiddev.patcher.Logger;
 
 import java.io.IOException;
@@ -57,6 +59,8 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		try {
 			host = IComputerEnvironment.class.getMethod("getHostString");
 		} catch (NoSuchMethodException ignored) {
+		} catch (RuntimeException e) {
+			Logger.error("Unknown error getting host string", e);
 		}
 
 		getHost = host;
@@ -132,9 +136,10 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		globals.load(state, new MathLib());
 		globals.load(state, new CoroutineLib());
 
-		if (Config.Computer.debug) {
-			globals.load(state, new DebugLib());
-		}
+		LibFunction.bind(state, globals, PrefixLoader.class, new String[]{"load", "loadstring"});
+
+		if (Config.APIs.debug) globals.load(state, new DebugLib());
+		if (Config.APIs.profiler) globals.load(state, new ProfilerLib());
 
 		for (String global : ILLEGAL_NAMES) {
 			globals.rawset(global, Constants.NIL);
@@ -148,6 +153,8 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 				Logger.error("Cannot find getHostString", e);
 			} catch (IllegalAccessException e) {
 				Logger.error("Cannot find getHostString", e);
+			} catch (RuntimeException e) {
+				Logger.error("Unknown error with setting _HOST", e);
 			}
 		}
 
@@ -171,7 +178,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 	public void loadBios(InputStream bios) {
 		if (mainThread != null) return;
 		try {
-			LuaFunction value = LoadState.load(state, bios, "bios", globals);
+			LuaFunction value = LoadState.load(state, bios, "@bios.lua", globals);
 			mainThread = new LuaThread(state, value, globals);
 		} catch (LuaError e) {
 			if (mainThread != null) {
@@ -441,6 +448,68 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			return taskID;
 		} else {
 			throw new LuaException("Task limit exceeded");
+		}
+	}
+
+	private static class PrefixLoader extends VarArgFunction {
+		private static final LuaString FUNCTION_STR = valueOf("function");
+		private static final LuaString EQ_STR = valueOf("=");
+
+		@Override
+		public Varargs invoke(LuaState state, Varargs args) {
+			switch (opcode) {
+				case 0: // "load", // ( func [,chunkname] ) -> chunk | nil, msg
+				{
+					LuaValue func = args.arg(1).checkFunction();
+					LuaString chunkname = args.arg(2).optLuaString(FUNCTION_STR);
+					if (!chunkname.startsWith('@') && !chunkname.startsWith('=')) {
+						chunkname = OperationHelper.concat(EQ_STR, chunkname);
+					}
+					return BaseLib.loadStream(state, new StringInputStream(state, func), chunkname);
+				}
+				case 1: // "loadstring", // ( string [,chunkname] ) -> chunk | nil, msg
+				{
+					LuaString script = args.arg(1).checkLuaString();
+					LuaString chunkname = args.arg(2).optLuaString(script);
+					if (!chunkname.startsWith('@') && !chunkname.startsWith('=')) {
+						chunkname = OperationHelper.concat(EQ_STR, chunkname);
+					}
+					return BaseLib.loadStream(state, script.toInputStream(), chunkname);
+				}
+			}
+
+			return NONE;
+		}
+	}
+
+	private static class StringInputStream extends InputStream {
+		private final LuaState state;
+		private final LuaValue func;
+		private byte[] bytes;
+		private int offset, remaining = 0;
+
+		public StringInputStream(LuaState state, LuaValue func) {
+			this.state = state;
+			this.func = func;
+		}
+
+		@Override
+		public int read() throws IOException {
+			if (remaining <= 0) {
+				LuaValue s = OperationHelper.call(state, func);
+				if (s.isNil()) {
+					return -1;
+				}
+				LuaString ls = s.strvalue();
+				bytes = ls.bytes;
+				offset = ls.offset;
+				remaining = ls.length;
+				if (remaining <= 0) {
+					return -1;
+				}
+			}
+			--remaining;
+			return bytes[offset++];
 		}
 	}
 }

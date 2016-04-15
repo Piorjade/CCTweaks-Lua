@@ -15,14 +15,6 @@ public final class Config {
 	 */
 	public static final class Computer {
 		/**
-		 * Enable the debug API.
-		 * This is NOT recommended for servers, use at your own risk.
-		 * It should be save on servers if using Cobalt though.
-		 */
-		@RequiresRestart(mc = false, world = true)
-		public static boolean debug;
-
-		/**
 		 * Time in milliseconds before 'Too long without yielding' errors.
 		 * You cannot shutdown/reboot the computer during this time.
 		 * Use carefully.
@@ -142,6 +134,21 @@ public final class Config {
 			@DefaultInt(1048576)
 			public static int limit;
 		}
+
+		/**
+		 * Enable the debug API.
+		 * This is NOT recommended for servers, use at your own risk.
+		 * It should be save on servers if using Cobalt though.
+		 */
+		@RequiresRestart(mc = false, world = true)
+		public static boolean debug;
+
+		/**
+		 * Enable the profiler API.
+		 * Only works on Cobalt
+		 */
+		@RequiresRestart(mc = false, world = true)
+		public static boolean profiler;
 	}
 
 	/**

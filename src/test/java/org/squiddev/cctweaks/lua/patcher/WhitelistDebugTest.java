@@ -22,12 +22,12 @@ public class WhitelistDebugTest {
 
 	@Test
 	public void assertWorks() throws Throwable {
-		System.setProperty("cctweaks.Computer.debug", "true");
+		System.setProperty("cctweaks.APIs.debug", "true");
 		System.setProperty("cctweaks.Computer.cobalt", cobalt);
 
 		RewritingLoader loader = VersionHandler.getLoader(version);
 		VersionHandler.run(loader, "assert.assert(debug, 'Expected debug API')");
 
-		System.setProperty("cctweaks.Computer.debug", "false");
+		System.setProperty("cctweaks.APIs.debug", "false");
 	}
 }

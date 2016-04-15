@@ -26,12 +26,13 @@ This will inject CCTweaks into the class loader, adding modifications.
 
 ## Tweaking
 Most tweaks are applied by default, though some can be configured through the command line:
- - `-Dcctweaks.Computer.debug=true`: Enable the debug API.
  - `-Dcctweaks.Computer.luaJC=true`: Enable LuaJC compilation (a `luaJC` flag also exists).
  - `-Dcctweaks.Computer.cobalt=true`: Enable the [Cobalt VM](https://github.com/SquidDev/Cobalt).
  - `-Dcctweaks.Computer.computerThreadTimeout=7000`: Set the computer thread timeout. Time is measured in milliseconds.
  - `-Dcctweaks.Computer.timeoutError=true`: Enable timeouts anywhere, rather than just from CC functions.
  - `-Dcctweaks.APIs.Socket.blacklist=127.0.0.0/8,10.0.0.0/8`: Configure the socket blacklist (can also do `whitelist`).
+ - `-Dcctweaks.APIs.debug=true`: Enable the debug API.
+ - `-Dcctweaks.APIs.profiler=true`: Enable the profiler API.
 
 ## CCEmuRedux
 This project is partly aimed at CCEmuRedux and so contains a custom launcher for CCEmuRedux.
