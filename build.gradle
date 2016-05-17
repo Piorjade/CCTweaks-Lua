@@ -2,10 +2,11 @@ plugins {
 	id "com.jfrog.bintray" version "1.4"
 }
 apply plugin: 'java'
+apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
 group 'org.squiddev'
-version '1.0.4'
+version '1.0.5'
 
 sourceCompatibility = 1.6
 
@@ -30,11 +31,12 @@ repositories {
 
 configurations {
 	shade
+	provided
 	compile.extendsFrom shade
 }
 
 dependencies {
-	compile "ComputerCraft:ComputerCraft:1.79"
+	provided "ComputerCraft:ComputerCraft:1.79"
 	compile 'com.google.guava:guava:19.0'
 	shade "org.ow2.asm:asm-debug-all:5.0.4"
 
@@ -50,6 +52,10 @@ dependencies {
 
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 }
+
+sourceSets.main.compileClasspath += configurations.provided
+sourceSets.test.compileClasspath += configurations.provided
+idea { module { scopes.PROVIDED.plus += [configurations.provided] } }
 
 def versions = [
 	('1.79'): 'http://addons-origin.cursecdn.com/files/2291/384/ComputerCraft1.79.jar',

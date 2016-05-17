@@ -10,7 +10,9 @@ public class MountHelpers {
 	static {
 		URL url = null;
 		try {
-			url = ClassLoader.getSystemClassLoader().loadClass("dan200.computercraft.api.filesystem.IMount").getProtectionDomain().getCodeSource().getLocation();
+			url = MountHelpers.class.getClassLoader()
+				.loadClass("dan200.computercraft.api.filesystem.IMount")
+				.getProtectionDomain().getCodeSource().getLocation();
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}

@@ -35,6 +35,7 @@ public class RewritingLoader extends URLClassLoader {
 		addClassLoaderExclusion("sun.");
 		addClassLoaderExclusion("org.objectweb.asm.");
 		addClassLoaderExclusion("org.squiddev.patcher.");
+		addClassLoaderExclusion("com.google.");
 
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.StreamHelpers");
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.launch.");
@@ -113,7 +114,7 @@ public class RewritingLoader extends URLClassLoader {
 			.get(null);
 	}
 
-	public byte[] getClassBytes(String name) throws IOException {
+	private byte[] getClassBytes(String name) throws IOException {
 		InputStream classStream = null;
 		try {
 			final URL classResource = findResource(name);
@@ -131,7 +132,7 @@ public class RewritingLoader extends URLClassLoader {
 		}
 	}
 
-	public void writeDump(String fileName, byte[] bytes) {
+	private void writeDump(String fileName, byte[] bytes) {
 		if (dumpAsm) {
 			File file = new File(dumpFolder, fileName);
 			File directory = file.getParentFile();

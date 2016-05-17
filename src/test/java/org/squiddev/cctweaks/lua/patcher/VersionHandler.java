@@ -19,7 +19,7 @@ import java.util.Scanner;
 public class VersionHandler {
 	public static List<Object[]> getVersions() {
 		return Arrays.asList(
-			// new Object[]{"1.75"},
+			new Object[]{"1.75"},
 			new Object[]{"1.78"},
 			new Object[]{"1.79"}
 		);
@@ -50,15 +50,10 @@ public class VersionHandler {
 		URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 		URL[] urls = loader.getURLs();
 
-		URL[] newUrls = new URL[urls.length];
+		URL[] newUrls = new URL[urls.length + 1];
 		System.arraycopy(urls, 0, newUrls, 0, urls.length);
 		try {
-			for (int i = 0; i < newUrls.length; i++) {
-				if (new File(newUrls[i].getFile()).getName().contains("ComputerCraft")) {
-					newUrls[i] = new File("lib/ComputerCraft-" + version + ".jar").toURI().toURL();
-					break;
-				}
-			}
+			newUrls[urls.length] = new File("lib/ComputerCraft-" + version + ".jar").toURI().toURL();
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
