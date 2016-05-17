@@ -38,7 +38,7 @@ dependencies {
 	compile 'com.google.guava:guava:19.0'
 	shade "org.ow2.asm:asm-debug-all:5.0.4"
 
-	shade('org.squiddev:luaj.luajc:1.0.5') {
+	shade('org.squiddev:luaj.luajc:1.0.7') {
 		// We provide a custom LuaJ source with ComputerCraft
 		exclude group: 'org.luaj'
 	}
