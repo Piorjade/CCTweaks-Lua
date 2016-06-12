@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
 group 'org.squiddev'
-version '1.0.5'
+version '1.0.6'
 
 sourceCompatibility = 1.6
 
@@ -46,7 +46,7 @@ dependencies {
 	}
 
 	shade 'org.squiddev:Patcher:1.1.1.1'
-	shade 'org.squiddev:Cobalt:0.1.7'
+	shade 'org.squiddev:Cobalt:0.1.8'
 
 	compile 'org.squiddev:ConfigGen:1.2.4'
 
@@ -78,6 +78,20 @@ task getVersions(type: Task) {
 
 compileTestJava.dependsOn getVersions
 
+jar {
+	// Package all the org.squiddev dependencies into one file
+	from(configurations.shade
+		.findAll { it.getAbsolutePath().contains("org.squiddev") }
+		.collect { (it.isDirectory() ? it : zipTree(it)) })
+		{
+			include "org/luaj/**"
+		}
+
+	// Package the patch files into a patch/ folder
+	filesMatching("org/luaj/**", {
+		it.path = "patch/" + it.path
+	})	
+}
 // Build a non-obfuscated jar
 task combineJar(type: Jar) {
 	from sourceSets.main.output
