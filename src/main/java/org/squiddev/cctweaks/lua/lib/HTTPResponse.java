@@ -67,9 +67,13 @@ public class HTTPResponse implements ILuaObject {
 			}
 			case 1:
 				if (closed) return null;
-				if (index >= result.length) return new Object[1];
+				if (index >= result.length) return new Object[]{""};
 
-				return new Object[]{Arrays.copyOfRange(result, index, result.length)};
+				int start = index;
+				int end = result.length;
+				index = end;
+
+				return new Object[]{Arrays.copyOfRange(result, start, end)};
 			case 2: {
 				if (closed) return null;
 				if (index >= result.length) return new Object[1];
