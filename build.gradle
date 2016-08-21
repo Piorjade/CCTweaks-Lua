@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
 group 'org.squiddev'
-version '1.0.7'
+version '1.0.8'
 
 sourceCompatibility = 1.6
 
@@ -40,7 +40,7 @@ dependencies {
 	compile 'com.google.guava:guava:19.0'
 	shade "org.ow2.asm:asm-debug-all:5.0.4"
 
-	shade('org.squiddev:luaj.luajc:1.0.8') {
+	shade('org.squiddev:luaj.luajc:1.0.9') {
 		// We provide a custom LuaJ source with ComputerCraft
 		exclude group: 'org.luaj'
 	}
