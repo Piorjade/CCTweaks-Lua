@@ -6,12 +6,17 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.lua.ILuaMachine;
 import dan200.computercraft.core.lua.LuaJLuaMachine;
+import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.objectweb.asm.ClassVisitor;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.lib.cobalt.CobaltMachine;
+import org.squiddev.cctweaks.lua.lib.luaj.BigIntegerValue;
 import org.squiddev.cctweaks.lua.lib.luaj.LuaJArguments;
+import org.squiddev.patcher.Logger;
+
+import java.lang.reflect.Field;
 
 /**
  * Various classes for helping with Lua conversion
@@ -50,11 +55,32 @@ public class LuaHelpers {
 		return e instanceof LuaException ? (LuaException) e : new LuaException(e.toString());
 	}
 
+
 	public static ILuaMachine createMachine(Computer computer) {
 		if (Config.Computer.cobalt) {
 			return new CobaltMachine(computer);
 		} else {
-			return new LuaJLuaMachine(computer);
+			LuaJLuaMachine machine = new LuaJLuaMachine(computer);
+			if (Config.APIs.bigInteger) {
+				try {
+					BigIntegerValue.setup((LuaValue) getGlobals.get(machine));
+				} catch (IllegalAccessException e) {
+					Logger.error("Cannot get LuaJLuaMachine.m_globals", e);
+				}
+			}
+
+			return machine;
+		}
+	}
+
+	private static Field getGlobals = null;
+
+	static {
+		try {
+			getGlobals = LuaJLuaMachine.class.getDeclaredField("m_globals");
+			getGlobals.setAccessible(true);
+		} catch (NoSuchFieldException e) {
+			Logger.error("Cannot load LuaJLuaMachine.m_globals", e);
 		}
 	}
 }

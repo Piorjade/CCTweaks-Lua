@@ -149,6 +149,13 @@ public final class Config {
 		 */
 		@RequiresRestart(mc = false, world = true)
 		public static boolean profiler;
+
+		/**
+		 * Enable the biginteger API.
+		 */
+		@RequiresRestart(mc = false, world = true)
+		@DefaultBoolean(true)
+		public static boolean bigInteger;
 	}
 
 	/**
