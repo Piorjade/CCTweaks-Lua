@@ -2,7 +2,6 @@ package org.squiddev.cctweaks.lua.lib.luaj;
 
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.ThreeArgFunction;
-import org.squiddev.patcher.Logger;
 
 import java.math.BigInteger;
 import java.util.Random;
@@ -65,7 +64,7 @@ public class BigIntegerValue extends LuaValue {
 
 	@Override
 	public LuaValue tonumber() {
-		return valueOf(number.longValue());
+		return valueOf(number.doubleValue());
 	}
 
 	@Override
@@ -90,7 +89,7 @@ public class BigIntegerValue extends LuaValue {
 
 	@Override
 	public LuaNumber optnumber(LuaNumber def) {
-		return valueOf(number.longValue());
+		return valueOf(number.doubleValue());
 	}
 
 	@Override
@@ -110,12 +109,12 @@ public class BigIntegerValue extends LuaValue {
 
 	@Override
 	public LuaNumber checknumber() {
-		return valueOf(number.longValue());
+		return valueOf(number.doubleValue());
 	}
 
 	@Override
 	public LuaNumber checknumber(String msg) {
-		return valueOf(number.longValue());
+		return valueOf(number.doubleValue());
 	}
 
 	@Override
@@ -150,6 +149,12 @@ public class BigIntegerValue extends LuaValue {
 	private static BigInteger getValue(LuaValue value) {
 		if (value instanceof BigIntegerValue) {
 			return ((BigIntegerValue) value).number;
+		} else if (value.type() == TSTRING) {
+			try {
+				return new BigInteger(value.toString());
+			} catch (NumberFormatException e) {
+				throw new LuaError("bad argument: number expected, got " + value.typename());
+			}
 		} else {
 			return BigInteger.valueOf(value.checklong());
 		}
@@ -235,7 +240,6 @@ public class BigIntegerValue extends LuaValue {
 					}
 					case 14: { // eq
 						BigInteger leftNum = getValue(left), rightNum = getValue(right);
-						Logger.debug("Comparing " + leftNum + " and " + rightNum);
 						return leftNum.equals(rightNum) ? TRUE : FALSE;
 					}
 					case 15: { // lt
@@ -250,10 +254,16 @@ public class BigIntegerValue extends LuaValue {
 						return valueOf(getValue(left).toString());
 					}
 					case 18: { // tonumber
-						return valueOf(getValue(left).longValue());
+						return valueOf(getValue(left).doubleValue());
 					}
 					case 19: { // new
-						return new BigIntegerValue(BigInteger.valueOf(left.checklong()), metatable);
+						if (left instanceof BigIntegerValue) {
+							return left;
+						} else if (left.type() == TSTRING) {
+							return new BigIntegerValue(new BigInteger(left.toString()), metatable);
+						} else {
+							return new BigIntegerValue(BigInteger.valueOf(left.checklong()), metatable);
+						}
 					}
 					case 20: { // modinv
 						BigInteger leftNum = getValue(left), rightNum = getValue(right);
@@ -271,7 +281,7 @@ public class BigIntegerValue extends LuaValue {
 						BigInteger leftNum = getValue(left);
 						return new BigIntegerValue(leftNum.abs(), metatable);
 					}
-					case 24: { // min
+					case 24: { // min TODO: Varargs version
 						BigInteger leftNum = getValue(left), rightNum = getValue(right);
 						return new BigIntegerValue(leftNum.min(rightNum), metatable);
 					}
