@@ -141,6 +141,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		if (Config.APIs.debug) globals.load(state, new DebugLib());
 		if (Config.APIs.profiler) globals.load(state, new ProfilerLib());
 		if (Config.APIs.bigInteger) BigIntegerValue.setup(globals);
+		if (Config.APIs.bitop) BitOpLib.setup(globals);
 
 		for (String global : ILLEGAL_NAMES) {
 			globals.rawset(global, Constants.NIL);

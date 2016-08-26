@@ -156,6 +156,13 @@ public final class Config {
 		@RequiresRestart(mc = false, world = true)
 		@DefaultBoolean(true)
 		public static boolean bigInteger;
+
+		/**
+		 * Enable the extended bit operator library
+		 */
+		@RequiresRestart(mc = false, world = true)
+		@DefaultBoolean(true)
+		public static boolean bitop;
 	}
 
 	/**

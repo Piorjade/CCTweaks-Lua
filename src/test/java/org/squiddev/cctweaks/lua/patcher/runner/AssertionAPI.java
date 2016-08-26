@@ -4,12 +4,14 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.apis.ILuaAPI;
 import org.junit.Assert;
-import org.squiddev.cctweaks.api.lua.IBinaryHandler;
+import org.squiddev.cctweaks.api.lua.IArguments;
+import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
+import org.squiddev.patcher.Logger;
 
 /**
  * Adds various assertions to Lua
  */
-public class AssertionAPI implements ILuaAPI, IBinaryHandler {
+public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments {
 	private Throwable exception;
 
 	@Override
@@ -31,7 +33,7 @@ public class AssertionAPI implements ILuaAPI, IBinaryHandler {
 
 	@Override
 	public String[] getMethodNames() {
-		return new String[]{"assert", "assertEquals"};
+		return new String[]{"assert", "assertEquals", "debug"};
 	}
 
 	private String getMessage(Object[] objects, int index) {
@@ -43,7 +45,7 @@ public class AssertionAPI implements ILuaAPI, IBinaryHandler {
 			return value.toString();
 		}
 
-		return null;
+		return "<no message>";
 	}
 
 	@Override
@@ -71,6 +73,14 @@ public class AssertionAPI implements ILuaAPI, IBinaryHandler {
 					}
 
 					return null;
+				case 2: {
+					StringBuilder buffer = new StringBuilder().append("[Lua] ");
+					for (int i = 0; i < objects.length; i++) {
+						buffer.append(getMessage(objects, i)).append("\t");
+					}
+					Logger.debug(buffer.toString());
+					return null;
+				}
 			}
 
 			return null;
@@ -78,6 +88,11 @@ public class AssertionAPI implements ILuaAPI, IBinaryHandler {
 			exception = e;
 			throw new LuaException(e.getMessage());
 		}
+	}
+
+	@Override
+	public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+		return callMethod(context, method, arguments.asBinary());
 	}
 
 	public Throwable getException() {

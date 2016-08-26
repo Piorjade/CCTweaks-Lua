@@ -6,13 +6,14 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.lua.ILuaMachine;
 import dan200.computercraft.core.lua.LuaJLuaMachine;
-import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.Varargs;
 import org.objectweb.asm.ClassVisitor;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.lib.cobalt.CobaltMachine;
 import org.squiddev.cctweaks.lua.lib.luaj.BigIntegerValue;
+import org.squiddev.cctweaks.lua.lib.luaj.BitOpLib;
 import org.squiddev.cctweaks.lua.lib.luaj.LuaJArguments;
 import org.squiddev.patcher.Logger;
 
@@ -61,12 +62,16 @@ public class LuaHelpers {
 			return new CobaltMachine(computer);
 		} else {
 			LuaJLuaMachine machine = new LuaJLuaMachine(computer);
-			if (Config.APIs.bigInteger) {
-				try {
-					BigIntegerValue.setup((LuaValue) getGlobals.get(machine));
-				} catch (IllegalAccessException e) {
-					Logger.error("Cannot get LuaJLuaMachine.m_globals", e);
-				}
+			LuaTable env = null;
+			try {
+				env = (LuaTable) getGlobals.get(machine);
+			} catch (IllegalAccessException e) {
+				Logger.error("Cannot get LuaJLuaMachine.m_globals", e);
+			}
+
+			if (env != null) {
+				if (Config.APIs.bigInteger) BigIntegerValue.setup(env);
+				if (Config.APIs.bitop) BitOpLib.setup(env);
 			}
 
 			return machine;
