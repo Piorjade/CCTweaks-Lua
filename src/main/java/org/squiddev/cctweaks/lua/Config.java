@@ -44,7 +44,6 @@ public final class Config {
 		 * Use the Cobalt Lua engine instead.
 		 * This is a fork of LuaJ with many bugs fixed.
 		 * However other bugs may have appeared, so use with caution.
-		 * This is incompatible with LuaJC.
 		 */
 		@DefaultBoolean(false)
 		public static boolean cobalt;

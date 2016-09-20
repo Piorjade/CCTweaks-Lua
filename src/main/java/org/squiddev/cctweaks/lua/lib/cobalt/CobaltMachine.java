@@ -85,6 +85,8 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			}
 		});
 
+		if (Config.Computer.luaJC) FallbackLuaJC.install(state);
+
 		state.debug = new DebugHandler(state) {
 			private int count = 0;
 			private boolean hasSoftAbort;

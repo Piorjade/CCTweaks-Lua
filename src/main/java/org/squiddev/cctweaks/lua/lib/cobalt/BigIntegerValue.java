@@ -22,7 +22,7 @@ public final class BigIntegerValue extends LuaValue {
 	}
 
 	@Override
-	public LuaValue getMetatable(LuaState state) {
+	public LuaTable getMetatable(LuaState state) {
 		return metatable;
 	}
 
@@ -111,7 +111,7 @@ public final class BigIntegerValue extends LuaValue {
 		return this == o || (o instanceof BigIntegerValue && number.equals(((BigIntegerValue) o).number));
 	}
 
-	public static void setup(LuaValue env) {
+	public static void setup(LuaTable env) {
 		env.rawset(NAME, BigIntegerFunction.makeTable(env));
 	}
 
@@ -285,7 +285,7 @@ public final class BigIntegerValue extends LuaValue {
 			}
 		}
 
-		private static LuaTable makeTable(LuaValue env) {
+		private static LuaTable makeTable(LuaTable env) {
 			LuaTable meta = new LuaTable(0, META_NAMES.length + 2);
 			LuaTable table = new LuaTable(0, META_NAMES.length + MAIN_NAMES.length);
 

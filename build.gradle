@@ -46,7 +46,8 @@ dependencies {
 	}
 
 	shade 'org.squiddev:Patcher:1.1.1.1'
-	shade 'org.squiddev:Cobalt:0.1.8'
+	shade 'org.squiddev:Cobalt:0.2'
+	shade 'org.squiddev:cobalt.luajc:1.1.0'
 
 	compile 'org.squiddev:ConfigGen:1.2.4'
 
