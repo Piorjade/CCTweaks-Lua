@@ -111,6 +111,11 @@ public final class BigIntegerValue extends LuaValue {
 		return this == o || (o instanceof BigIntegerValue && number.equals(((BigIntegerValue) o).number));
 	}
 
+	@Override
+	public int hashCode() {
+		return number.hashCode();
+	}
+
 	public static void setup(LuaTable env) {
 		env.rawset(NAME, BigIntegerFunction.makeTable(env));
 	}

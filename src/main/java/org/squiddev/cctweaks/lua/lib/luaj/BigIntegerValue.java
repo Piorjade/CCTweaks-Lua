@@ -138,6 +138,11 @@ public class BigIntegerValue extends LuaValue {
 	}
 
 	@Override
+	public int hashCode() {
+		return number.hashCode();
+	}
+
+	@Override
 	public LuaValue eq(LuaValue luaValue) {
 		return this == luaValue ? TRUE : this.comparemt(EQ, luaValue);
 	}
