@@ -1,4 +1,4 @@
-# CCTweaks Lua
+# CCTweaks Lua [![Build Status](https://travis-ci.org/SquidDev-CC/CCTweaks-Lua.svg?branch=master)](https://travis-ci.org/SquidDev-CC/CCTweaks-Lua)
 Modifications to ComputerCraft
 
 This is a standalone version of [CCTweaks](https://github.com/SquidDev-CC/CC-Tweaks) that just contains modifications to the LuaVM and surrounding infrastructure.
