@@ -8,7 +8,7 @@ import org.junit.runners.Parameterized;
 import java.util.List;
 
 @RunWith(Parameterized.class)
-public class BitOpTest {
+public class APITest {
 	@Parameterized.Parameters(name = "Version: {0}, Cobalt: {1}")
 	public static List<Object[]> getVersions() {
 		return VersionHandler.getVersionsWithCobalt();
@@ -30,7 +30,12 @@ public class BitOpTest {
 	}
 
 	@Test
-	public void queueEvent() throws Throwable {
+	public void testBitop() throws Throwable {
 		VersionHandler.runFile(loader, "bitop");
+	}
+
+	@Test
+	public void testBigInt() throws Throwable {
+		VersionHandler.runFile(loader, "bigint");
 	}
 }

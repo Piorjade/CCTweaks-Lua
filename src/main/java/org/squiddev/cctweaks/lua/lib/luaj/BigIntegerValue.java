@@ -128,8 +128,15 @@ public class BigIntegerValue extends LuaValue {
 	}
 
 	@Override
-	public boolean eq_b(LuaValue luaValue) {
-		return this == luaValue || this.comparemt(EQ, luaValue).toboolean();
+	public boolean eq_b(LuaValue other) {
+		if (this == other) {
+			return true;
+		} else if (type() != other.type()) {
+			return false;
+		} else {
+			LuaValue tag = metatag(EQ);
+			return !tag.isnil() && tag == other.metatag(EQ) && tag.call(this, other).toboolean();
+		}
 	}
 
 	@Override
@@ -144,7 +151,7 @@ public class BigIntegerValue extends LuaValue {
 
 	@Override
 	public LuaValue eq(LuaValue luaValue) {
-		return this == luaValue ? TRUE : this.comparemt(EQ, luaValue);
+		return eq_b(luaValue) ? TRUE : FALSE;
 	}
 
 	public static void setup(LuaValue env) {
@@ -265,7 +272,11 @@ public class BigIntegerValue extends LuaValue {
 						if (left instanceof BigIntegerValue) {
 							return left;
 						} else if (left.type() == TSTRING) {
-							return new BigIntegerValue(new BigInteger(left.toString()), metatable);
+							try {
+								return new BigIntegerValue(new BigInteger(left.toString()), metatable);
+							} catch (NumberFormatException e) {
+								throw new LuaError("bad argument: number expected, got " + left.typename());
+							}
 						} else {
 							return new BigIntegerValue(BigInteger.valueOf(left.checklong()), metatable);
 						}
@@ -320,12 +331,6 @@ public class BigIntegerValue extends LuaValue {
 		private static LuaTable makeTable(LuaValue env) {
 			LuaTable meta = new LuaTable(0, META_NAMES.length + 2);
 			LuaTable table = new LuaTable(0, META_NAMES.length + MAIN_NAMES.length);
-
-			BigIntegerFunction create = new BigIntegerFunction(meta);
-			create.opcode = CREATE_INDEX;
-			create.name = "new";
-			create.env = env;
-			table.rawset("new", create);
 
 			for (int i = 0; i < META_NAMES.length; i++) {
 				BigIntegerFunction func = new BigIntegerFunction(meta);

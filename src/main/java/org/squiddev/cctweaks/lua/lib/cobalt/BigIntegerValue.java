@@ -294,12 +294,6 @@ public final class BigIntegerValue extends LuaValue {
 			LuaTable meta = new LuaTable(0, META_NAMES.length + 2);
 			LuaTable table = new LuaTable(0, META_NAMES.length + MAIN_NAMES.length);
 
-			BigIntegerFunction create = new BigIntegerFunction(meta);
-			create.opcode = CREATE_INDEX;
-			create.name = "new";
-			create.env = env;
-			table.rawset("new", create);
-
 			for (int i = 0; i < META_NAMES.length; i++) {
 				BigIntegerFunction func = new BigIntegerFunction(meta);
 				func.opcode = i;
