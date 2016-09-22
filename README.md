@@ -24,7 +24,10 @@ This will inject CCTweaks into the class loader, adding modifications.
  - Allow getting headers from HTTP responses
  - API for adding custom APIs
 
-## Tweaking
+## Documentation
+There is extensive documentation on the [CCTweaks-Lua wiki](https://github.com/SquidDev-CC/CCTweaks-Lua/wiki).
+
+### Basic options
 Most tweaks are applied by default, though some can be configured through the command line:
  - `-Dcctweaks.Computer.luaJC=true`: Enable LuaJC compilation (a `luaJC` flag also exists).
  - `-Dcctweaks.Computer.cobalt=true`: Enable the [Cobalt VM](https://github.com/SquidDev/Cobalt).
@@ -34,7 +37,7 @@ Most tweaks are applied by default, though some can be configured through the co
  - `-Dcctweaks.APIs.debug=true`: Enable the debug API.
  - `-Dcctweaks.APIs.profiler=true`: Enable the profiler API.
 
-## CCEmuRedux
+### CCEmuRedux
 This project is partly aimed at CCEmuRedux and so contains a custom launcher for CCEmuRedux.
 
  - Place the jar in `.ccemuredux/bin/`
