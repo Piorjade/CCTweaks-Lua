@@ -92,6 +92,9 @@ public final class BinaryUtils {
 		chain.add(new BinaryMachine());
 		chain.add(new BinaryFS());
 
+		// PeripheralAPI rewrites
+		chain.add(new ClassMerger("dan200.computercraft.core.apis.PeripheralAPI", "org.squiddev.cctweaks.lua.patch.PeripheralAPI_Patch"));
+
 		// HTTP rewrite
 		chain.add(new ClassMerger("dan200.computercraft.core.apis.HTTPAPI", "org.squiddev.cctweaks.lua.patch.HTTPAPI_Patch"));
 
