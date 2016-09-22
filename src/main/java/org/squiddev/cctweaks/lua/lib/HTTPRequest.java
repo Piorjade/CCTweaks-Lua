@@ -149,7 +149,7 @@ public class HTTPRequest {
 
 								int i = 0;
 								for (String value : header.getValue()) {
-									values.put(i, value);
+									values.put(++i, value);
 								}
 
 								headers.put(header.getKey(), values);
