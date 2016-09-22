@@ -24,11 +24,17 @@ public class RewritingLoader extends URLClassLoader {
 	public final CustomChain chain = new CustomChain();
 
 	private Set<String> classLoaderExceptions = new HashSet<String>();
-	private final File dumpFolder = new File("asm/cctweaks");
+	private final File dumpFolder;
 	private boolean dumpAsm;
 
 	public RewritingLoader(URL[] urls) {
+		this(urls, new File("asm/cctweaks"));
+	}
+
+	public RewritingLoader(URL[] urls, File folder) {
 		super(urls, null);
+
+		dumpFolder = folder;
 
 		// classloader exclusions
 		addClassLoaderExclusion("java.");

@@ -5,7 +5,6 @@ import org.squiddev.cctweaks.lua.launch.RewritingLoader;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -52,13 +51,11 @@ public class VersionHandler {
 
 		URL[] newUrls = new URL[urls.length + 1];
 		System.arraycopy(urls, 0, newUrls, 0, urls.length);
-		try {
-			newUrls[urls.length] = new File("lib/ComputerCraft-" + version + ".jar").toURI().toURL();
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
+		newUrls[urls.length] = new File("lib/ComputerCraft-" + version + ".jar").toURI().toURL();
 
-		RewritingLoader newLoader = new RewritingLoader(newUrls);
+		System.setProperty("cctweaks.Testing.dumpAsm", "true");
+
+		RewritingLoader newLoader = new RewritingLoader(newUrls, new File("asm/cctweaks-" + version));
 		newLoader.addClassLoaderExclusion("org.junit.");
 		newLoader.addClassLoaderExclusion("org.hamcrest.");
 		Tweaks.setup(newLoader.chain);
