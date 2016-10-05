@@ -56,9 +56,9 @@ dependencies {
 
 	compile 'org.squiddev:ConfigGen:1.2.5'
 
-	shade 'net.sandius.rembulan:rembulan-runtime:0.1-SNAPSHOT'
-	shade 'net.sandius.rembulan:rembulan-compiler:0.1-SNAPSHOT'
-	shade 'net.sandius.rembulan:rembulan-stdlib:0.1-SNAPSHOT'
+	shade('net.sandius.rembulan:rembulan-runtime:0.1-SNAPSHOT') { exclude group: 'org.ow2.asm' }
+	shade('net.sandius.rembulan:rembulan-compiler:0.1-SNAPSHOT') { exclude group: 'org.ow2.asm' }
+	shade('net.sandius.rembulan:rembulan-stdlib:0.1-SNAPSHOT') { exclude group: 'org.ow2.asm' }
 
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 }
