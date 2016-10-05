@@ -12,6 +12,7 @@ public class Tweaks {
 
 		chain.add(new AddAdditionalData());
 		chain.add(new CustomAPIs());
+		chain.add(new CustomBios());
 		chain.add(new CustomMachine());
 		chain.add(new CustomTimeout());
 		chain.add(new InjectLuaJC());

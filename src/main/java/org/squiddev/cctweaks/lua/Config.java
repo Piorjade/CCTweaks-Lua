@@ -2,6 +2,7 @@ package org.squiddev.cctweaks.lua;
 
 import org.squiddev.cctweaks.lua.lib.socket.AddressMatcher;
 import org.squiddev.configgen.*;
+import org.squiddev.patcher.Logger;
 
 /**
  * The main config class
@@ -9,6 +10,16 @@ import org.squiddev.configgen.*;
 @org.squiddev.configgen.Config(languagePrefix = "gui.config.cctweaks.", propertyPrefix = "cctweaks")
 public final class Config {
 	public static String mcVersion = "1.8.9";
+
+	private static final String BIOS_PATH = "/assets/computercraft/lua/bios.lua";
+
+	@OnSync
+	public static void sync() {
+		if (dan200.computercraft.core.computer.Computer.class.getResource(Computer.biosPath) == null) {
+			Logger.warn("Cannot find custom bios (" + Computer.biosPath + "), reverting to default");
+			Computer.biosPath = BIOS_PATH;
+		}
+	}
 
 	/**
 	 * Computer tweaks and items.
@@ -54,6 +65,14 @@ public final class Config {
 		 */
 		@DefaultBoolean(false)
 		public static boolean timeoutError;
+
+		/**
+		 * Specify a custom bios path to use. You
+		 * must include the initial slash.
+		 */
+		@RequiresRestart(mc = false, world = true)
+		@DefaultString(BIOS_PATH)
+		public static String biosPath;
 	}
 
 	/**
