@@ -27,6 +27,11 @@ repositories {
 		name = "forge"
 		url = "http://files.minecraftforge.net/maven"
 	}
+
+	maven {
+		name = "snapshots"
+		url = "https://oss.sonatype.org/content/repositories/snapshots/"
+	}
 }
 
 configurations {
@@ -50,6 +55,10 @@ dependencies {
 	shade 'org.squiddev:cobalt.luajc:1.1.0'
 
 	compile 'org.squiddev:ConfigGen:1.2.5'
+
+	shade 'net.sandius.rembulan:rembulan-runtime:0.1-SNAPSHOT'
+	shade 'net.sandius.rembulan:rembulan-compiler:0.1-SNAPSHOT'
+	shade 'net.sandius.rembulan:rembulan-stdlib:0.1-SNAPSHOT'
 
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 }
