@@ -4,6 +4,8 @@ import dan200.computercraft.api.filesystem.IWritableMount;
 import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.filesystem.FileSystemException;
 import dan200.computercraft.core.filesystem.IMountedFile;
+import dan200.computercraft.core.filesystem.IMountedFileBinary;
+import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
 import java.io.*;
@@ -11,12 +13,20 @@ import java.util.Set;
 
 @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "SynchronizeOnNonFinalField"})
 @MergeVisitor.Rename(
-	from = "org/squiddev/cctweaks/lua/patch/binfs/INormalFile",
-	to = "dan200/computercraft/core/filesystem/IMountedFileNormal"
+	from = {
+		"org/squiddev/cctweaks/lua/patch/binfs/INormalFile",
+		"org/squiddev/cctweaks/lua/patch/binfs/LuaExceptionStub"
+	},
+	to = {
+		"dan200/computercraft/core/filesystem/IMountedFileNormal",
+		"dan200/computercraft/api/lua/LuaException"
+	}
 )
 public class FileSystem_Patch extends FileSystem {
 	@MergeVisitor.Stub
 	private Set<IMountedFile> m_openFiles;
+
+	private int openFilesCount;
 
 	public FileSystem_Patch(String rootLabel, IWritableMount rootMount) throws FileSystemException {
 		super(rootLabel, rootMount);
@@ -44,6 +54,31 @@ public class FileSystem_Patch extends FileSystem {
 
 		public OutputStream openForAppend(String path) throws FileSystemException {
 			return null;
+		}
+	}
+
+	public void addFile(IMountedFile file) {
+		synchronized (m_openFiles) {
+			m_openFiles.add(file);
+			if (++openFilesCount > Config.Computer.maxFilesHandles) {
+				// Ensure that we aren't over the open file limit
+				// We throw Lua exceptions as FileSystemExceptions won't be handled by fs.open
+				try {
+					file.close();
+				} catch (IOException e) {
+					throw new LuaExceptionStub("Too many file handles: " + e.getMessage());
+				}
+				throw new LuaExceptionStub("Too many file handles");
+			}
+		}
+	}
+
+	public void removeFile(IMountedFile file, Closeable stream) throws IOException {
+		synchronized (m_openFiles) {
+			m_openFiles.remove(file);
+			openFilesCount--;
+
+			stream.close();
 		}
 	}
 
@@ -103,10 +138,7 @@ public class FileSystem_Patch extends FileSystem {
 
 				@Override
 				public void close() throws IOException {
-					synchronized (m_openFiles) {
-						m_openFiles.remove(this);
-						reader.close();
-					}
+					removeFile(this, reader);
 				}
 
 				@Override
@@ -114,9 +146,7 @@ public class FileSystem_Patch extends FileSystem {
 					throw new UnsupportedOperationException();
 				}
 			};
-			synchronized (m_openFiles) {
-				this.m_openFiles.add(file);
-			}
+			addFile(file);
 			return file;
 		}
 		return null;
@@ -151,10 +181,7 @@ public class FileSystem_Patch extends FileSystem {
 
 				@Override
 				public void close() throws IOException {
-					synchronized (m_openFiles) {
-						m_openFiles.remove(this);
-						writer.close();
-					}
+					removeFile(this, writer);
 				}
 
 				@Override
@@ -162,11 +189,67 @@ public class FileSystem_Patch extends FileSystem {
 					writer.flush();
 				}
 			};
-			synchronized (m_openFiles) {
-				m_openFiles.add(file);
-			}
+			addFile(file);
 			return file;
 		}
 		return null;
+	}
+
+	public synchronized IMountedFileBinary openForBinaryRead(String path) throws FileSystemException {
+		path = sanitizePath(path);
+		MountWrapper mount = this.getMount(path);
+		final InputStream stream = mount.openForRead(path);
+		if (stream != null) {
+			IMountedFileBinary file = new IMountedFileBinary() {
+				public int read() throws IOException {
+					return stream.read();
+				}
+
+				public void write(int i) throws IOException {
+					throw new UnsupportedOperationException();
+				}
+
+				public void close() throws IOException {
+					removeFile(this, stream);
+				}
+
+				public void flush() throws IOException {
+					throw new UnsupportedOperationException();
+				}
+			};
+			addFile(file);
+			return file;
+		} else {
+			return null;
+		}
+	}
+
+	public synchronized IMountedFileBinary openForBinaryWrite(String path, boolean append) throws FileSystemException {
+		path = sanitizePath(path);
+		MountWrapper mount = this.getMount(path);
+		final OutputStream stream = append ? mount.openForAppend(path) : mount.openForWrite(path);
+		if (stream != null) {
+			IMountedFileBinary file = new IMountedFileBinary() {
+				public int read() throws IOException {
+					throw new UnsupportedOperationException();
+				}
+
+				public void write(int i) throws IOException {
+					stream.write(i);
+				}
+
+				public void close() throws IOException {
+					removeFile(this, stream);
+				}
+
+				public void flush() throws IOException {
+					stream.flush();
+				}
+			};
+			addFile(file);
+			return file;
+		} else {
+			return null;
+		}
 	}
 }

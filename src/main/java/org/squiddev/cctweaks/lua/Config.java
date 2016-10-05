@@ -73,6 +73,13 @@ public final class Config {
 		@RequiresRestart(mc = false, world = true)
 		@DefaultString(BIOS_PATH)
 		public static String biosPath;
+
+		/**
+		 * Maximum number of file handles a single computer can have open
+		 */
+		@DefaultInt(1024)
+		@Range(min = 1)
+		public static int maxFilesHandles;
 	}
 
 	/**
