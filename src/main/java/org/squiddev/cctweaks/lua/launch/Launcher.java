@@ -25,9 +25,9 @@ public class Launcher {
 		RewritingLoader classLoader = new RewritingLoader(current.getURLs());
 		Thread.currentThread().setContextClassLoader(classLoader);
 
+		Tweaks.setup(classLoader.chain);
 		classLoader.loadConfig();
 
-		Tweaks.setup(classLoader.chain);
 		return classLoader;
 	}
 

@@ -74,7 +74,6 @@ public class RewritingLoader extends URLClassLoader {
 			}
 
 			byte[] original = getClassBytes(fileName);
-			if (original == null) throw new NullPointerException("File not found");
 			byte[] transformed = chain.transform(name, original);
 			if (transformed != original) writeDump(fileName, transformed);
 
