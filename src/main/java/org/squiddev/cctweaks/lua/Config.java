@@ -15,7 +15,10 @@ public final class Config {
 
 	@OnSync
 	public static void sync() {
-		if (dan200.computercraft.core.computer.Computer.class.getResource(Computer.biosPath) == null) {
+		if (!Computer.biosPath.startsWith("/")) {
+			Logger.warn("Bios path (" + Computer.biosPath + ") does not start with '/', reverting to default");
+			Computer.biosPath = BIOS_PATH;
+		} else if (Config.class.getResource(Computer.biosPath) == null) {
 			Logger.warn("Cannot find custom bios (" + Computer.biosPath + "), reverting to default");
 			Computer.biosPath = BIOS_PATH;
 		}
