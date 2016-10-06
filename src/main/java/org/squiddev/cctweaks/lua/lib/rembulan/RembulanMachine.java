@@ -15,9 +15,8 @@ import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.Continuation;
 import net.sandius.rembulan.exec.DirectCallExecutor;
-import net.sandius.rembulan.impl.DefaultTable;
 import net.sandius.rembulan.impl.StateContexts;
-import net.sandius.rembulan.lib.ModuleLib;
+import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
@@ -59,18 +58,15 @@ public class RembulanMachine extends AbstractLuaContext implements ILuaMachine {
 		StateContext state = this.state = StateContexts.newDefaultInstance();
 
 		Table globals = this.globals = state.newTable();
-		new DefaultBasicLib(null, null, globals).installInto(state, globals);
+		installInto(state, globals, new DefaultBasicLib(null, null, globals));
+		installInto(state, globals, new DefaultCoroutineLib());
+		installInto(state, globals, new DefaultStringLib());
+		installInto(state, globals, new DefaultMathLib());
+		installInto(state, globals, new DefaultTableLib());
+		installInto(state, globals, new DefaultUtf8Lib());
 
-		// TODO: Correctly install modules
-		ModuleLib moduleLib = new DefaultModuleLib(state, globals);
-		moduleLib.installInto(state, globals);
 
-		moduleLib.install(new DefaultCoroutineLib());
-		moduleLib.install(new DefaultStringLib());
-		moduleLib.install(new DefaultMathLib());
-		moduleLib.install(new DefaultTableLib());
-		moduleLib.install(new DefaultUtf8Lib());
-		moduleLib.install(new DefaultDebugLib());
+		if (Config.APIs.debug) installInto(state, globals, new DefaultDebugLib());
 
 		for (String global : ILLEGAL_NAMES) {
 			globals.rawset(global, null);
@@ -85,6 +81,17 @@ public class RembulanMachine extends AbstractLuaContext implements ILuaMachine {
 		if (ComputerCraft.disable_lua51_features) {
 			globals.rawset("_CC_DISABLE_LUA51_FEATURES", true);
 		}
+	}
+
+	private static void installInto(StateContext context, Table env, Lib lib) {
+		lib.preInstall(context, env);
+
+		Table t = lib.toTable(context);
+		if (t != null) {
+			env.rawset(lib.name(), t);
+		}
+
+		lib.postInstall(context, env, t);
 	}
 
 	@Override
@@ -102,7 +109,7 @@ public class RembulanMachine extends AbstractLuaContext implements ILuaMachine {
 
 	private Table wrapLuaObject(final ILuaObject object) {
 		String[] methods = object.getMethodNames();
-		Table result = DefaultTable.factory().newTable(0, methods.length);
+		Table result = state.newTable(0, methods.length);
 
 		for (int i = 0; i < methods.length; i++) {
 			final int method = i;
@@ -253,7 +260,7 @@ public class RembulanMachine extends AbstractLuaContext implements ILuaMachine {
 				if (value != null) return value;
 			}
 
-			Table table = new DefaultTable();
+			Table table = state.newTable();
 			tables.put(object, table);
 
 			for (Map.Entry<?, ?> pair : ((Map<?, ?>) object).entrySet()) {

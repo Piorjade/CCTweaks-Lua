@@ -30,7 +30,7 @@ public class LuaMachineHelpers {
 	}
 
 	public static String getHost(Computer computer) {
-		if (computer == null) return null;
+		if (getHost == null || computer == null) return null;
 
 		try {
 			// We have to use reflection for different CC versions
