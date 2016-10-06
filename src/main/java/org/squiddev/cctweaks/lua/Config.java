@@ -63,6 +63,13 @@ public final class Config {
 		public static boolean cobalt;
 
 		/**
+		 * Use the Rembulan Lua 5.1 engine instead.
+		 * This will require a custom BIOS and many programs may not work as expected
+		 */
+		@DefaultBoolean(false)
+		public static boolean rembulan;
+
+		/**
 		 * Error much earlier on a timeout.
 		 * Note: This only applies to the Cobalt VM
 		 */

@@ -78,12 +78,12 @@ public class RembulanArguments implements IArguments {
 
 	@Override
 	public Object[] asArguments() {
-		return RembulanConverter.toObjects(args, 1, false);
+		return RembulanConverter.toObjects(args, 0, false);
 	}
 
 	@Override
 	public Object[] asBinary() {
-		return RembulanConverter.toObjects(args, 1, true);
+		return RembulanConverter.toObjects(args, 0, true);
 	}
 
 	@Override
