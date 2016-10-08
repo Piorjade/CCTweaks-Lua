@@ -12,3 +12,5 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - asm/
+jdk:
+  - oraclejdk8
