@@ -31,6 +31,7 @@ import org.squiddev.patcher.Logger;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -293,7 +294,7 @@ public class RembulanMachine implements ILuaMachine {
 					throw new LuaRuntimeException("Java exception thrown " + e.getMessage());
 				}
 			} else {
-				final LuaContext invoker = new LuaContext(computer, object, method, args);
+				final LuaContext invoker = new LuaContext(computer, context.getCurrentCoroutine(), object, method, args);
 				threads.execute(invoker);
 				try {
 					handleResult(context, invoker);
@@ -351,11 +352,22 @@ public class RembulanMachine implements ILuaMachine {
 			while (!state) wait();
 			state = false;
 		}
+
+		public synchronized boolean await(long timeout) throws InterruptedException {
+			if (!state) {
+				wait(timeout);
+				if (!state) return false;
+			}
+			state = false;
+			return true;
+		}
 	}
 
 	private final class LuaContext extends AbstractLuaContext implements Runnable {
 		private final Semaphore externalLock = new Semaphore();
 		private final Semaphore yieldLock = new Semaphore();
+
+		private final WeakReference<Coroutine> coroutine;
 
 		private final ILuaObject object;
 		private final int method;
@@ -363,8 +375,9 @@ public class RembulanMachine implements ILuaMachine {
 		private volatile Object[] values;
 		private volatile Throwable exception;
 
-		public LuaContext(Computer computer, ILuaObject object, int method, Object[] args) {
+		public LuaContext(Computer computer, Coroutine coroutine, ILuaObject object, int method, Object[] args) {
 			super(computer);
+			this.coroutine = new WeakReference<Coroutine>(coroutine);
 			this.object = object;
 			this.method = method;
 			this.values = args;
@@ -377,7 +390,18 @@ public class RembulanMachine implements ILuaMachine {
 			values = objects;
 
 			externalLock.signal();
-			yieldLock.await();
+			try {
+				// Every 30 seconds check to see if the coroutine has been GCed
+				// if so then abort this task.
+				while (!yieldLock.await(30000)) {
+					if (coroutine.get() == null) {
+						throw new InterruptedException("Orphaned async task");
+					}
+				}
+			} catch (InterruptedException e) {
+				Logger.error("Interrupted yielding ", e);
+				throw e;
+			}
 
 			return toValues(values);
 		}
@@ -418,7 +442,6 @@ public class RembulanMachine implements ILuaMachine {
 
 		@Override
 		public Object[] yield(Object[] objects) throws InterruptedException {
-			Logger.error("Yielding where they shouldn't", new RuntimeException());
 			throw new IllegalStateException("Cannot yield from non-yieldable method");
 		}
 	}
