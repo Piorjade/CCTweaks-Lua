@@ -1,6 +1,7 @@
 package org.squiddev.cctweaks.lua.lib.rembulan;
 
 import dan200.computercraft.ComputerCraft;
+import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.ILuaObject;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.apis.ILuaAPI;
@@ -14,16 +15,19 @@ import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
+import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.runtime.*;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
+import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.StreamHelpers;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.AbstractLuaContext;
 import org.squiddev.cctweaks.lua.lib.BinaryConverter;
+import org.squiddev.patcher.Logger;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,11 +42,13 @@ public class RembulanMachine implements ILuaMachine {
 	private static final ExecutorService threads = ThreadBuilder.createThread("Rembulan", 16);
 
 	private final Computer computer;
+	private final ILuaContext noYieldContext;
+
 	private final StateContext state;
 	private final Table globals;
 	private final DirectCallExecutor executor = DirectCallExecutor.newExecutor();
-	private final CompilerChunkLoader loader;
 
+	private final CompilerChunkLoader loader;
 	private String eventFilter = null;
 	private String hardAbort = null;
 	private String softAbort = null;
@@ -50,6 +56,7 @@ public class RembulanMachine implements ILuaMachine {
 
 	public RembulanMachine(Computer computer) {
 		this.computer = computer;
+		this.noYieldContext = new LuaContextNoYield(computer);
 
 		StateContext state = this.state = StateContexts.newDefaultInstance();
 		loader = CompilerChunkLoader.of("generated.computer_" + computer.getID() + "$x");
@@ -262,10 +269,14 @@ public class RembulanMachine implements ILuaMachine {
 		private final ILuaObject object;
 		private final int method;
 
+		private final boolean noYield;
+
 		private WrappedLuaFunction(Computer computer, ILuaObject object, int method) {
 			this.computer = computer;
 			this.object = object;
 			this.method = method;
+
+			this.noYield = object instanceof IMethodDescriptor && !((IMethodDescriptor) object).willYield(method);
 		}
 
 		@Override
@@ -277,17 +288,35 @@ public class RembulanMachine implements ILuaMachine {
 				throw new LuaRuntimeException(message);
 			}
 
-			final LuaContext invoker = new LuaContext(computer, object, method, args);
-			threads.execute(invoker);
-			try {
-				handleResult(context, invoker);
-			} catch (InterruptedException e) {
-				throw new LuaRuntimeException(e);
+			if (noYield) {
+				try {
+					Object[] returned = ArgumentDelegator.delegateLuaObject(object, noYieldContext, method, new RembulanArguments(args));
+					context.getReturnBuffer().setToContentsOf(toValues(returned));
+				} catch (LuaException e) {
+					e.printStackTrace();
+					throw new LuaRuntimeException(e.getMessage());
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					throw new LuaRuntimeException(e);
+				} catch (Throwable e) {
+					e.printStackTrace();
+					throw new LuaRuntimeException("Java exception thrown " + e.getMessage());
+				}
+			} else {
+				final LuaContext invoker = new LuaContext(computer, object, method, args);
+				threads.execute(invoker);
+				try {
+					handleResult(context, invoker);
+				} catch (InterruptedException e) {
+					throw new LuaRuntimeException(e);
+				}
 			}
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object state) throws ResolvedControlThrowable {
+			if (noYield) throw new NonsuspendableFunctionException();
+
 			LuaContext invoker = (LuaContext) state;
 			try {
 				invoker.resume(context.getReturnBuffer().getAsArray());
@@ -308,7 +337,6 @@ public class RembulanMachine implements ILuaMachine {
 				} catch (InterruptedException e) {
 					throw e;
 				} catch (Throwable e) {
-					e.printStackTrace();
 					throw new LuaRuntimeException("Java exception thrown " + e.getMessage());
 				}
 			} else {
@@ -390,6 +418,18 @@ public class RembulanMachine implements ILuaMachine {
 				done = true;
 				externalLock.signal();
 			}
+		}
+	}
+
+	private final class LuaContextNoYield extends AbstractLuaContext {
+		public LuaContextNoYield(Computer computer) {
+			super(computer);
+		}
+
+		@Override
+		public Object[] yield(Object[] objects) throws InterruptedException {
+			Logger.error("Yielding where they shouldn't", new RuntimeException());
+			throw new IllegalStateException("Cannot yield from non-yieldable method");
 		}
 	}
 }
