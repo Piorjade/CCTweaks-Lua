@@ -29,13 +29,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
 
 import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.ILLEGAL_NAMES;
 import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.getHost;
 
 public class RembulanMachine implements ILuaMachine {
-	private static final ScheduledExecutorService threads = ThreadBuilder.createThread("Rembulan", 128);
+	private static final ExecutorService threads = ThreadBuilder.createThread("Rembulan", 16);
 
 	private final Computer computer;
 	private final StateContext state;
@@ -278,7 +278,7 @@ public class RembulanMachine implements ILuaMachine {
 			}
 
 			final LuaContext invoker = new LuaContext(computer, object, method, args);
-			threads.submit(invoker);
+			threads.execute(invoker);
 			try {
 				handleResult(context, invoker);
 			} catch (InterruptedException e) {

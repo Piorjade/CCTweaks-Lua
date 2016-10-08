@@ -39,11 +39,11 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class SocketConnection implements ILuaObjectWithArguments {
-	private static final ScheduledExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads);
+	private static final ExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads);
 
 	private final SocketAPI owner;
 
