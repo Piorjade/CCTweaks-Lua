@@ -22,6 +22,11 @@ public final class Config {
 			Logger.warn("Cannot find custom bios (" + Computer.biosPath + "), reverting to default");
 			Computer.biosPath = BIOS_PATH;
 		}
+
+		if (Computer.MultiThreading.enabled && Computer.MultiThreading.threads > 1 && !Computer.cobalt) {
+			Logger.warn("Can only have 1 thread when running on LuaJ, reverting to default");
+			Computer.MultiThreading.threads = 1;
+		}
 	}
 
 	/**
@@ -83,6 +88,30 @@ public final class Config {
 		@DefaultInt(1024)
 		@Range(min = 1)
 		public static int maxFilesHandles;
+
+		/**
+		 * Configuration options to enable running computers across multiple
+		 * threads.
+		 */
+		@RequiresRestart
+		public static class MultiThreading {
+			/**
+			 * Whether the custom multi-threaded executor is enabled.
+			 * This can be used with any runtime but may function differently
+			 * to normal ComputerCraft.
+			 */
+			@DefaultBoolean(false)
+			public static boolean enabled;
+
+			/**
+			 * Number of threads to execute computers on. More threads means
+			 * more computers can run at once, but may consume more resources.
+			 * This requires the Cobalt VM.
+			 */
+			@DefaultInt(1)
+			@Range(min = 1)
+			public static int threads;
+		}
 	}
 
 	/**

@@ -1,6 +1,5 @@
 package org.squiddev.cctweaks.lua.patcher;
 
-import org.squiddev.cctweaks.lua.asm.Tweaks;
 import org.squiddev.cctweaks.lua.launch.RewritingLoader;
 
 import java.io.File;
@@ -58,8 +57,8 @@ public class VersionHandler {
 		RewritingLoader newLoader = new RewritingLoader(newUrls, new File("asm/cctweaks-" + version));
 		newLoader.addClassLoaderExclusion("org.junit.");
 		newLoader.addClassLoaderExclusion("org.hamcrest.");
-		Tweaks.setup(newLoader.chain);
 		newLoader.loadConfig();
+		newLoader.loadChain();
 		newLoader.chain.finalise();
 		return newLoader;
 	}

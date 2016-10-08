@@ -45,7 +45,7 @@ public class RewritingLoader extends URLClassLoader {
 
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.StreamHelpers");
 		addClassLoaderExclusion("org.squiddev.cctweaks.lua.launch.");
-		addClassLoaderExclusion("org.squiddev.cctweaks.lua.asm.");
+		addClassLoaderExclusion("org.squiddev.cctweaks.lua.asm.CustomChain");
 	}
 
 	@Override
@@ -108,6 +108,12 @@ public class RewritingLoader extends URLClassLoader {
 
 	public void addClassLoaderExclusion(String toExclude) {
 		classLoaderExceptions.add(toExclude);
+	}
+
+	public void loadChain() throws Exception {
+		loadClass("org.squiddev.cctweaks.lua.asm.Tweaks")
+			.getMethod("setup", CustomChain.class)
+			.invoke(null, chain);
 	}
 
 	public void loadConfig() throws Exception {

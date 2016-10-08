@@ -1,7 +1,5 @@
 package org.squiddev.cctweaks.lua.launch;
 
-import org.squiddev.cctweaks.lua.asm.Tweaks;
-
 import java.net.URLClassLoader;
 import java.util.Arrays;
 
@@ -25,8 +23,8 @@ public class Launcher {
 		RewritingLoader classLoader = new RewritingLoader(current.getURLs());
 		Thread.currentThread().setContextClassLoader(classLoader);
 
-		Tweaks.setup(classLoader.chain);
 		classLoader.loadConfig();
+		classLoader.loadChain();
 
 		return classLoader;
 	}
