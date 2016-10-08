@@ -1,8 +1,8 @@
 package org.squiddev.cctweaks.lua.lib.rembulan;
 
 import net.sandius.rembulan.LuaRuntimeException;
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.impl.DefaultTable;
 import net.sandius.rembulan.impl.DefaultUserdata;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.AbstractLibFunction;
@@ -32,8 +32,8 @@ public final class BigIntegerValue extends DefaultUserdata {
 		return number.hashCode();
 	}
 
-	public static void setup(Table env) {
-		env.rawset(NAME, BigIntegerFunction.makeTable(env));
+	public static void setup(StateContext state, Table env) {
+		env.rawset(NAME, BigIntegerFunction.makeTable(state, env));
 	}
 
 	private static BigInteger getValue(ArgumentIterator iterator) {
@@ -218,9 +218,9 @@ public final class BigIntegerValue extends DefaultUserdata {
 			state.getReturnBuffer().setTo(call(iterator));
 		}
 
-		private static Table makeTable(Table env) {
-			Table meta = DefaultTable.factory().newTable(0, META_NAMES.length + 2);
-			Table table = DefaultTable.factory().newTable(0, META_NAMES.length + MAIN_NAMES.length);
+		private static Table makeTable(StateContext state, Table env) {
+			Table meta = state.newTable(0, META_NAMES.length + 2);
+			Table table = state.newTable(0, META_NAMES.length + MAIN_NAMES.length);
 
 			for (int i = 0; i < META_NAMES.length; i++) {
 				BigIntegerFunction func = new BigIntegerFunction(META_NAMES[i], meta, i);

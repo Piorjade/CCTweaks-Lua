@@ -70,7 +70,8 @@ public class RembulanMachine implements ILuaMachine {
 		installInto(state, globals, new DefaultUtf8Lib());
 
 		if (Config.APIs.debug) installInto(state, globals, new DefaultDebugLib());
-		if (Config.APIs.bigInteger) BigIntegerValue.setup(globals);
+		if (Config.APIs.bigInteger) BigIntegerValue.setup(state, globals);
+		if (Config.APIs.bitop) BitOpLib.setup(state, globals);
 
 		for (String global : ILLEGAL_NAMES) {
 			globals.rawset(global, null);

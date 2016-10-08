@@ -31,9 +31,6 @@ public class APITest {
 
 	@Test
 	public void testBitop() throws Throwable {
-		// TODO: Implement bitop for rembulan
-		if (runtime.equals("rembulan")) return;
-
 		VersionHandler.runFile(loader, "bitop");
 	}
 
