@@ -10,7 +10,7 @@ import dan200.computercraft.core.computer.MainThread;
 public abstract class AbstractLuaContext implements ILuaContext {
 	private final Computer computer;
 
-	protected AbstractLuaContext(Computer computer) {
+	public AbstractLuaContext(Computer computer) {
 		this.computer = computer;
 	}
 

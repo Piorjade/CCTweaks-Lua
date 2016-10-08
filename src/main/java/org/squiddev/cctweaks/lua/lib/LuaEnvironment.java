@@ -97,7 +97,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 		}
 	}
 
-	private static class LuaAPI implements ILuaAPI, ILuaObjectWithArguments, IExtendedLuaObject {
+	private static class LuaAPI implements ILuaAPI, ILuaObjectWithArguments, IExtendedLuaObject, IMethodDescriptor {
 		private final org.squiddev.cctweaks.api.lua.ILuaAPI api;
 		private final ILuaAPIFactory factory;
 
@@ -144,6 +144,11 @@ public class LuaEnvironment implements ILuaEnvironment {
 		@Override
 		public Map<Object, Object> getAdditionalData() {
 			return api instanceof IExtendedLuaObject ? ((IExtendedLuaObject) api).getAdditionalData() : Collections.emptyMap();
+		}
+
+		@Override
+		public boolean willYield(int method) {
+			return !(api instanceof IMethodDescriptor) || ((IMethodDescriptor) api).willYield(method);
 		}
 	}
 

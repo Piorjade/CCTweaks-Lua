@@ -3,10 +3,7 @@ package org.squiddev.cctweaks.lua.lib;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import org.squiddev.cctweaks.api.lua.IArguments;
-import org.squiddev.cctweaks.api.lua.ILuaAPI;
-import org.squiddev.cctweaks.api.lua.ILuaAPIFactory;
-import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
+import org.squiddev.cctweaks.api.lua.*;
 import org.squiddev.cctweaks.lua.Config;
 
 import java.io.ByteArrayOutputStream;
@@ -17,7 +14,7 @@ import java.util.zip.InflaterOutputStream;
 /**
  * Adds inflate/deflate APIs
  */
-public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory {
+public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory, IMethodDescriptor {
 	@Override
 	public void startup() {
 
@@ -108,5 +105,10 @@ public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory
 		}
 
 		return new Object[]{baos.toByteArray()};
+	}
+
+	@Override
+	public boolean willYield(int method) {
+		return false;
 	}
 }

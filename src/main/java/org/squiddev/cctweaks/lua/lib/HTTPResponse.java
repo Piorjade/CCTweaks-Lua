@@ -3,11 +3,12 @@ package org.squiddev.cctweaks.lua.lib;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.ILuaObject;
 import dan200.computercraft.api.lua.LuaException;
+import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 
 import java.util.Arrays;
 import java.util.Map;
 
-public class HTTPResponse implements ILuaObject {
+public class HTTPResponse implements ILuaObject, IMethodDescriptor {
 	private final int responseCode;
 	private final byte[] result;
 	private final Map<String, Map<Integer, String>> headers;
@@ -92,5 +93,10 @@ public class HTTPResponse implements ILuaObject {
 		}
 
 		return null;
+	}
+
+	@Override
+	public boolean willYield(int method) {
+		return false;
 	}
 }

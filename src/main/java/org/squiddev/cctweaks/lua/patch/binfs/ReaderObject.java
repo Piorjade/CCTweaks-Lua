@@ -4,6 +4,7 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
+import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.io.IOException;
 	from = "org/squiddev/cctweaks/lua/patch/binfs/INormalFile",
 	to = "dan200/computercraft/core/filesystem/IMountedFileNormal"
 )
-public class ReaderObject implements ILuaObjectWithArguments {
+public class ReaderObject implements ILuaObjectWithArguments, IMethodDescriptor {
 	private final INormalFile stream;
 
 	public ReaderObject(INormalFile stream) {
@@ -61,5 +62,10 @@ public class ReaderObject implements ILuaObjectWithArguments {
 	@Override
 	public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
 		return callMethod(context, method, arguments.asBinary());
+	}
+
+	@Override
+	public boolean willYield(int method) {
+		return false;
 	}
 }

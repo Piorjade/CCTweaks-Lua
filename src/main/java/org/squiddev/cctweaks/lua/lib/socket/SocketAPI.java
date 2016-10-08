@@ -24,6 +24,7 @@ package org.squiddev.cctweaks.lua.lib.socket;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import org.squiddev.cctweaks.api.lua.ILuaAPI;
+import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.patcher.Logger;
 
@@ -32,7 +33,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 
-public class SocketAPI implements ILuaAPI {
+public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 	protected final HashSet<SocketConnection> connections = new HashSet<SocketConnection>();
 
 	@Override
@@ -120,5 +121,10 @@ public class SocketAPI implements ILuaAPI {
 		}
 
 		throw new LuaException("Address could not be parsed or no valid port given");
+	}
+
+	@Override
+	public boolean willYield(int method) {
+		return false;
 	}
 }
