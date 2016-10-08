@@ -10,16 +10,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Helper methods for various things
  */
 public class ThreadBuilder {
-	public static int THREAD_PRIORITY = Thread.MIN_PRIORITY + (Thread.NORM_PRIORITY - Thread.MIN_PRIORITY) / 2;
+	public static int LOW_PRIORITY = Thread.MIN_PRIORITY + (Thread.NORM_PRIORITY - Thread.MIN_PRIORITY) / 2;
+	public static int NORM_PRIORITY = Thread.NORM_PRIORITY;
 
-	public static ThreadPoolExecutor createThread(String name, int threads) {
+	public static ThreadPoolExecutor createThread(String name, int minThreads, int maxThreads, final int priority) {
 		final String prefix = "CCTweaks-" + name + "-";
 		final AtomicInteger counter = new AtomicInteger(1);
 
 		SecurityManager manager = System.getSecurityManager();
 		final ThreadGroup group = manager == null ? Thread.currentThread().getThreadGroup() : manager.getThreadGroup();
 		return new ThreadPoolExecutor(
-			threads, Integer.MAX_VALUE,
+			minThreads, maxThreads,
 			60L, TimeUnit.SECONDS,
 			new SynchronousQueue<Runnable>(),
 			new ThreadFactory() {
@@ -27,11 +28,15 @@ public class ThreadBuilder {
 				public Thread newThread(Runnable runnable) {
 					Thread thread = new Thread(group, runnable, prefix + counter.getAndIncrement());
 					if (!thread.isDaemon()) thread.setDaemon(true);
-					if (thread.getPriority() != THREAD_PRIORITY) thread.setPriority(THREAD_PRIORITY);
+					if (thread.getPriority() != priority) thread.setPriority(priority);
 
 					return thread;
 				}
 			}
 		);
+	}
+
+	public static ThreadPoolExecutor createThread(String name, int threads, int priority) {
+		return createThread(name, threads, threads, priority);
 	}
 }

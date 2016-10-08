@@ -44,7 +44,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class SocketConnection implements ILuaObjectWithArguments, IMethodDescriptor {
-	private static final ExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads);
+	private static final ExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads, ThreadBuilder.LOW_PRIORITY);
 
 	private final SocketAPI owner;
 

@@ -39,7 +39,7 @@ import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.ILLEGAL_NAMES;
 import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.getHost;
 
 public class RembulanMachine implements ILuaMachine {
-	private static final ExecutorService threads = ThreadBuilder.createThread("Rembulan", 16);
+	private static final ExecutorService threads = ThreadBuilder.createThread("Rembulan", 16, Integer.MAX_VALUE, ThreadBuilder.NORM_PRIORITY);
 
 	private final Computer computer;
 	private final ILuaContext noYieldContext;
@@ -123,10 +123,8 @@ public class RembulanMachine implements ILuaMachine {
 		if (continuation != null) return;
 		try {
 			LuaFunction function = loader.loadTextChunk(new Variable(globals), "bios.lua", StreamHelpers.toString(inputStream));
-
 			continuation = (LuaFunction) executor.call(state, DefaultCoroutineLib.Wrap.INSTANCE, function)[0];
 		} catch (Exception e) {
-			e.printStackTrace();
 			continuation = null;
 		}
 	}
@@ -155,15 +153,12 @@ public class RembulanMachine implements ILuaMachine {
 				try {
 					results = executor.call(state, continuation, args);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
 					continuation = null;
 					return;
 				} catch (CallException e) {
-					e.printLuaFormatStackTraceback(System.err, loader.getChunkClassLoader(), null);
 					continuation = null;
 					return;
 				} catch (CallPausedException e) {
-					e.printStackTrace();
 					continuation = null;
 					return;
 				}
@@ -178,9 +173,6 @@ public class RembulanMachine implements ILuaMachine {
 				} else {
 					eventFilter = null;
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
 			} finally {
 				softAbort = null;
 				hardAbort = null;
@@ -294,13 +286,10 @@ public class RembulanMachine implements ILuaMachine {
 					Object[] returned = ArgumentDelegator.delegateLuaObject(object, noYieldContext, method, new RembulanArguments(args));
 					context.getReturnBuffer().setToContentsOf(toValues(returned));
 				} catch (LuaException e) {
-					e.printStackTrace();
 					throw new LuaRuntimeException(e.getMessage());
 				} catch (InterruptedException e) {
-					e.printStackTrace();
 					throw new LuaRuntimeException(e);
 				} catch (Throwable e) {
-					e.printStackTrace();
 					throw new LuaRuntimeException("Java exception thrown " + e.getMessage());
 				}
 			} else {
