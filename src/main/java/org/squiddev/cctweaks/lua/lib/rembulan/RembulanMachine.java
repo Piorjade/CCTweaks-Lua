@@ -17,7 +17,6 @@ import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.*;
-import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.*;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.lua.Config;
@@ -26,14 +25,10 @@ import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.AbstractLuaContext;
 import org.squiddev.cctweaks.lua.lib.BinaryConverter;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.ILLEGAL_NAMES;
@@ -121,19 +116,7 @@ public class RembulanMachine implements ILuaMachine {
 			LuaFunction function = loader.loadTextChunk(new Variable(globals), "bios.lua", StreamHelpers.toString(inputStream));
 
 			continuation = (LuaFunction) executor.call(state, DefaultCoroutineLib.Wrap.INSTANCE, function)[0];
-		} catch (IOException e) {
-			e.printStackTrace();
-			continuation = null;
-		} catch (CallException e) {
-			e.printStackTrace();
-			continuation = null;
-		} catch (LoaderException e) {
-			e.printStackTrace();
-			continuation = null;
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			continuation = null;
-		} catch (CallPausedException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			continuation = null;
 		}
@@ -186,6 +169,9 @@ public class RembulanMachine implements ILuaMachine {
 				} else {
 					eventFilter = null;
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
 			} finally {
 				softAbort = null;
 				hardAbort = null;
@@ -291,11 +277,10 @@ public class RembulanMachine implements ILuaMachine {
 			}
 
 			final LuaContext invoker = new LuaContext(computer, object, method, args);
-			invoker.setupTask();
+			threads.submit(invoker);
 			try {
 				handleResult(context, invoker);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 				throw new LuaRuntimeException(e);
 			}
 		}
@@ -307,38 +292,35 @@ public class RembulanMachine implements ILuaMachine {
 				invoker.resume(context.getReturnBuffer().getAsArray());
 				handleResult(context, invoker);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 				throw new LuaRuntimeException(e);
 			}
 		}
 
 		private void handleResult(ExecutionContext context, LuaContext invoker) throws ResolvedControlThrowable, InterruptedException {
-			try {
-				invoker.externalLock.await();
+			invoker.externalLock.await();
 
-				if (invoker.getTask().isDone()) {
-					context.getReturnBuffer().setToContentsOf(invoker.getTask().get());
-				} else {
-					try {
-						context.yield(invoker.values);
-					} catch (UnresolvedControlThrowable ct) {
-						throw ct.resolve(this, invoker);
-					}
+			if (invoker.isDone()) {
+				try {
+					context.getReturnBuffer().setToContentsOf(invoker.get());
+				} catch (LuaException e) {
+					throw new LuaRuntimeException(e.getMessage());
+				} catch (InterruptedException e) {
+					throw e;
+				} catch (Throwable e) {
+					e.printStackTrace();
+					throw new LuaRuntimeException("Java exception thrown " + e.getMessage());
 				}
-			} catch (ExecutionException ex) {
-				Throwable e = ex.getCause();
-				if (e instanceof LuaRuntimeException) {
-					throw (LuaRuntimeException) e;
-				} else if (e instanceof InterruptedException) {
-					throw (InterruptedException) e;
-				} else {
-					throw new LuaRuntimeException("Java Exception Thrown: " + e.toString());
+			} else {
+				try {
+					context.yield(invoker.values);
+				} catch (UnresolvedControlThrowable ct) {
+					throw ct.resolve(this, invoker);
 				}
 			}
 		}
 	}
 
-	private static class Semaphore {
+	private static final class Semaphore {
 		private volatile boolean state = false;
 
 		public synchronized void signal() {
@@ -352,15 +334,15 @@ public class RembulanMachine implements ILuaMachine {
 		}
 	}
 
-	private final class LuaContext extends AbstractLuaContext implements Callable<Object[]> {
+	private final class LuaContext extends AbstractLuaContext implements Runnable {
 		private final Semaphore externalLock = new Semaphore();
 		private final Semaphore yieldLock = new Semaphore();
 
 		private final ILuaObject object;
 		private final int method;
+		private volatile boolean done = false;
 		private volatile Object[] values;
-
-		private Future<Object[]> task;
+		private volatile Throwable exception;
 
 		public LuaContext(Computer computer, ILuaObject object, int method, Object[] args) {
 			super(computer);
@@ -371,6 +353,8 @@ public class RembulanMachine implements ILuaMachine {
 
 		@Override
 		public Object[] yield(Object[] objects) throws InterruptedException {
+			if (done) throw new IllegalStateException("Cannot yield when complete");
+
 			values = objects;
 
 			externalLock.signal();
@@ -380,32 +364,29 @@ public class RembulanMachine implements ILuaMachine {
 		}
 
 		public void resume(Object[] objects) throws InterruptedException {
+			if (done) throw new IllegalStateException("Cannot resume when complete");
 			values = objects;
 			yieldLock.signal();
 		}
 
-		public Future<Object[]> getTask() {
-			if (task == null) throw new IllegalStateException("task is null");
-			return task;
+		public boolean isDone() {
+			return done;
 		}
 
-		public Future<Object[]> setupTask() {
-			if (task != null) throw new IllegalStateException("task is already running");
-			return task = threads.submit(this);
+		public Object[] get() throws Throwable {
+			if (!done) throw new IllegalStateException("Cannot get values when not complete");
+			if (exception != null) throw exception;
+			return values;
 		}
 
 		@Override
-		public Object[] call() throws InterruptedException, LuaRuntimeException {
+		public void run() {
 			try {
-				return toValues(ArgumentDelegator.delegateLuaObject(object, this, method, new RembulanArguments(values)));
-			} catch (LuaException e) {
-				throw new LuaRuntimeException(e);
-			} catch (InterruptedException e) {
-				throw e;
+				values = toValues(ArgumentDelegator.delegateLuaObject(object, this, method, new RembulanArguments(values)));
 			} catch (Throwable e) {
-				e.printStackTrace();
-				throw new LuaRuntimeException("Java Exception Thrown: " + e.toString());
+				exception = e;
 			} finally {
+				done = true;
 				externalLock.signal();
 			}
 		}
