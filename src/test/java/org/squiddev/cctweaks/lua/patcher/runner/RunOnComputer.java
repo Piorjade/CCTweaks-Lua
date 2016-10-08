@@ -14,7 +14,7 @@ public class RunOnComputer {
 	public static void run(String program) throws Throwable {
 		MemoryMount mount = new MemoryMount()
 			.addFile("test", program)
-			.addFile("startup", "assert.assert(pcall(loadfile('test') or error)) os.shutdown()");
+			.addFile("startup", "assert.assert(pcall(loadfile('test', _ENV or getfenv()) or error)) os.shutdown()");
 		Terminal term = new Terminal(51, 19);
 		final Computer computer = new Computer(
 			new BasicEnvironment(mount),

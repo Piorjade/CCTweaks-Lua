@@ -24,25 +24,36 @@ public class VersionHandler {
 		);
 	}
 
-	public static List<Object[]> getVersionsWithCobalt() {
+	public static List<Object[]> getVersionsWithRuntimes() {
 		List<Object[]> versions = getVersions();
-		List<Object[]> withCobalt = new ArrayList<Object[]>(versions.size() * 2);
+		List<Object[]> withRuntimes = new ArrayList<Object[]>(versions.size() * 3);
 		for (Object[] version : versions) {
 			{
 				Object[] with = new Object[version.length + 1];
 				System.arraycopy(version, 0, with, 0, version.length);
-				with[with.length - 1] = "true";
-				withCobalt.add(with);
+				with[with.length - 1] = "luaj";
+				withRuntimes.add(with);
 			}
 			{
 				Object[] without = new Object[version.length + 1];
 				System.arraycopy(version, 0, without, 0, version.length);
-				without[without.length - 1] = "false";
-				withCobalt.add(without);
+				without[without.length - 1] = "cobalt";
+				withRuntimes.add(without);
+			}
+			{
+				Object[] without = new Object[version.length + 1];
+				System.arraycopy(version, 0, without, 0, version.length);
+				without[without.length - 1] = "rembulan";
+				withRuntimes.add(without);
 			}
 		}
 
-		return withCobalt;
+		return withRuntimes;
+	}
+
+	public static void setup(String runtime) {
+		System.setProperty("cctweaks.Computer.cobalt", runtime.equals("cobalt") ? "true" : "false");
+		System.setProperty("cctweaks.Computer.rembulan", runtime.equals("rembulan") ? "true" : "false");
 	}
 
 	public static RewritingLoader getLoader(String version) throws Exception {

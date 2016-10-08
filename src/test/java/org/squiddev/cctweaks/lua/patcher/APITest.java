@@ -9,28 +9,31 @@ import java.util.List;
 
 @RunWith(Parameterized.class)
 public class APITest {
-	@Parameterized.Parameters(name = "Version: {0}, Cobalt: {1}")
+	@Parameterized.Parameters(name = "Version: {0}, Runtime: {1}")
 	public static List<Object[]> getVersions() {
-		return VersionHandler.getVersionsWithCobalt();
+		return VersionHandler.getVersionsWithRuntimes();
 	}
 
 	@Parameterized.Parameter(0)
 	public String version;
 
 	@Parameterized.Parameter(1)
-	public String cobalt;
+	public String runtime;
 
 	private ClassLoader loader;
 
 	@Before
 	public void setup() throws Exception {
-		System.setProperty("cctweaks.Computer.cobalt", cobalt);
+		VersionHandler.setup(runtime);
 		System.setProperty("cctweaks.APIs.bit", "true");
 		loader = VersionHandler.getLoader(version);
 	}
 
 	@Test
 	public void testBitop() throws Throwable {
+		// TODO: Implement bitop for rembulan
+		if (runtime.equals("rembulan")) return;
+
 		VersionHandler.runFile(loader, "bitop");
 	}
 
