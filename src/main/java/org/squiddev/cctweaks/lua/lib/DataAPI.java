@@ -11,7 +11,9 @@ import org.squiddev.cctweaks.lua.Config;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
 /**
@@ -84,7 +86,7 @@ public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory
 		if (data.length >= Config.APIs.Data.limit) throw new LuaException("Data is too long");
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-		InflaterOutputStream inos = new InflaterOutputStream(baos);
+		InflaterOutputStream inos = new InflaterOutputStream(baos, new Inflater(true));
 		try {
 			inos.write(data);
 			inos.finish();
@@ -99,7 +101,7 @@ public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory
 		if (data.length >= Config.APIs.Data.limit) throw new LuaException("Data is too long");
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-		DeflaterOutputStream inos = new DeflaterOutputStream(baos);
+		DeflaterOutputStream inos = new DeflaterOutputStream(baos, new Deflater(Deflater.DEFAULT_COMPRESSION, true));
 		try {
 			inos.write(data);
 			inos.finish();
