@@ -1,6 +1,7 @@
 package org.squiddev.cctweaks.lua;
 
 import org.squiddev.cctweaks.lua.lib.socket.AddressMatcher;
+import org.squiddev.cobalt.luajc.CompileOptions;
 import org.squiddev.configgen.*;
 import org.squiddev.patcher.Logger;
 
@@ -27,6 +28,16 @@ public final class Config {
 			Logger.warn("Can only have 1 thread when running on LuaJ, reverting to default");
 			Computer.MultiThreading.threads = 1;
 		}
+
+		if (Computer.luaJC) {
+			Computer.LuaJC.enabled = true;
+			Logger.warn("Computer.luaJC is deprecated: use Computer.LuaJC.enabled instead");
+		}
+
+		if (Computer.luaJCVerify) {
+			Computer.LuaJC.verify = true;
+			Logger.warn("Computer.luaJCVerify is deprecated: use Computer.LuaJC.verify instead");
+		}
 	}
 
 	/**
@@ -44,19 +55,19 @@ public final class Config {
 
 		/**
 		 * Compile Lua bytecode to Java bytecode.
-		 * This speeds up code execution.
+		 * Deprecated: Use Computer.LuaJC.enabled instead!
 		 */
 		@DefaultBoolean(false)
 		@RequiresRestart(mc = false, world = true)
+		@Deprecated
 		public static boolean luaJC;
 
 		/**
 		 * Verify LuaJC sources on generation.
-		 * This will slow down compilation.
-		 * If you have errors, please turn this and debug on and
-		 * send it with the bug report.
+		 * Deprecated: Use Computer.LuaJC.verify instead!
 		 */
 		@DefaultBoolean(false)
+		@Deprecated
 		public static boolean luaJCVerify;
 
 		/**
@@ -88,6 +99,38 @@ public final class Config {
 		@DefaultInt(1024)
 		@Range(min = 1)
 		public static int maxFilesHandles;
+
+		/**
+		 * Compile Lua bytecode to Java bytecode.
+		 * This speeds up code execution.
+		 */
+		public static class LuaJC {
+			/**
+			 * Compile Lua bytecode to Java bytecode.
+			 * This speeds up code execution.
+			 */
+			@DefaultBoolean(false)
+			@RequiresRestart(mc = false, world = true)
+			public static boolean enabled;
+
+			/**
+			 * Verify sources on generation.
+			 * This will slow down compilation.
+			 * If you have errors, please turn this and debug on and
+			 * send it with the bug report.
+			 */
+			@DefaultBoolean(false)
+			public static boolean verify;
+
+			/**
+			 * Number of calls required before compiling:
+			 * 1 compiles when first called,
+			 * 0 or less compiles when loaded
+			 */
+			@DefaultInt(CompileOptions.THRESHOLD)
+			@Range(min = 0)
+			public static int threshold;
+		}
 
 		/**
 		 * Configuration options to enable running computers across multiple

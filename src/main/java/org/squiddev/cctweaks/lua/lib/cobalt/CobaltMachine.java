@@ -75,7 +75,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 	private String hardAbort = null;
 	private String softAbort = null;
 
-	public CobaltMachine(Computer computer) {
+	public CobaltMachine(final Computer computer) {
 		this.computer = computer;
 
 		final LuaState state = this.state = new LuaState(new AbstractResourceManipulator() {
@@ -85,7 +85,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			}
 		});
 
-		if (Config.Computer.luaJC) FallbackLuaJC.install(state);
+		if (Config.Computer.LuaJC.enabled) FallbackLuaJC.install(state);
 
 		state.debug = new DebugHandler(state) {
 			private int count = 0;
