@@ -17,8 +17,7 @@ import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.StateContexts;
-import net.sandius.rembulan.lib.Lib;
-import net.sandius.rembulan.lib.impl.*;
+import net.sandius.rembulan.lib.*;
 import net.sandius.rembulan.runtime.*;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
@@ -63,14 +62,14 @@ public class RembulanMachine implements ILuaMachine {
 		loader = CompilerChunkLoader.of("generated.computer_" + computer.getID() + "$x");
 
 		Table globals = this.globals = state.newTable();
-		installInto(state, globals, new DefaultBasicLib(null, loader, globals));
-		installInto(state, globals, new DefaultCoroutineLib());
-		installInto(state, globals, new DefaultStringLib());
-		installInto(state, globals, new DefaultMathLib());
-		installInto(state, globals, new DefaultTableLib());
-		installInto(state, globals, new DefaultUtf8Lib());
+		BasicLib.installInto(state, globals, null, loader);
+		CoroutineLib.installInto(state, globals);
+		StringLib.installInto(state, globals);
+		MathLib.installInto(state, globals);
+		TableLib.installInto(state, globals);
+		Utf8Lib.installInto(state, globals);
 
-		if (Config.APIs.debug) installInto(state, globals, new DefaultDebugLib());
+		if (Config.APIs.debug) DebugLib.installInto(state, globals);
 		if (Config.APIs.bigInteger) BigIntegerValue.setup(state, globals);
 		if (Config.APIs.bitop) BitOpLib.setup(state, globals);
 
@@ -87,17 +86,6 @@ public class RembulanMachine implements ILuaMachine {
 		if (ComputerCraft.disable_lua51_features) {
 			globals.rawset("_CC_DISABLE_LUA51_FEATURES", true);
 		}
-	}
-
-	private static void installInto(StateContext context, Table env, Lib lib) {
-		lib.preInstall(context, env);
-
-		Table t = lib.toTable(context);
-		if (t != null) {
-			env.rawset(lib.name(), t);
-		}
-
-		lib.postInstall(context, env, t);
 	}
 
 	@Override
@@ -124,7 +112,7 @@ public class RembulanMachine implements ILuaMachine {
 		if (continuation != null) return;
 		try {
 			LuaFunction function = loader.loadTextChunk(new Variable(globals), "bios.lua", StreamHelpers.toString(inputStream));
-			continuation = (LuaFunction) executor.call(state, DefaultCoroutineLib.Wrap.INSTANCE, function)[0];
+			continuation = (LuaFunction) executor.call(state, CoroutineLib.wrap(), function)[0];
 		} catch (Exception e) {
 			continuation = null;
 		}

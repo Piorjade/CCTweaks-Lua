@@ -4,9 +4,9 @@ import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.DefaultUserdata;
-import net.sandius.rembulan.lib.Lib;
-import net.sandius.rembulan.lib.impl.AbstractLibFunction;
-import net.sandius.rembulan.lib.impl.ArgumentIterator;
+import net.sandius.rembulan.lib.AbstractLibFunction;
+import net.sandius.rembulan.lib.ArgumentIterator;
+import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.runtime.ExecutionContext;
 
 import java.math.BigInteger;
@@ -37,9 +37,9 @@ public final class BigIntegerValue extends DefaultUserdata {
 	}
 
 	private static BigInteger getValue(ArgumentIterator iterator) {
-		Object value = iterator.peekOrNil();
+		Object value = iterator.hasNext() ? iterator.peek() : null;
 		if (value == null) {
-			iterator.nextStrict(NAME, BigIntegerValue.class);
+			iterator.nextUserdata(NAME, BigIntegerValue.class);
 		} else if (value instanceof BigIntegerValue) {
 			iterator.skip();
 			return ((BigIntegerValue) value).number;
@@ -47,7 +47,7 @@ public final class BigIntegerValue extends DefaultUserdata {
 			try {
 				return new BigInteger(value.toString());
 			} catch (NumberFormatException e) {
-				iterator.nextStrict(NAME, BigIntegerValue.class);
+				iterator.nextUserdata(NAME, BigIntegerValue.class);
 			}
 		} else {
 			return BigInteger.valueOf(iterator.nextInteger());
@@ -154,7 +154,7 @@ public final class BigIntegerValue extends DefaultUserdata {
 						return getValue(iterator).doubleValue();
 					}
 					case 19: { // new
-						Object left = iterator.peekOrNil();
+						Object left = iterator.hasNext() ? iterator.peek() : null;
 						if (left instanceof BigIntegerValue) {
 							return left;
 						} else {
@@ -187,7 +187,7 @@ public final class BigIntegerValue extends DefaultUserdata {
 					}
 					case 26: { // isProbPrime
 						BigInteger leftNum = getValue(iterator);
-						int rightProb = iterator.optNextInt(100);
+						int rightProb = iterator.nextOptionalInt(100);
 						return leftNum.isProbablePrime(rightProb);
 					}
 					case 27: { // nextProbPrime
@@ -235,7 +235,7 @@ public final class BigIntegerValue extends DefaultUserdata {
 
 			meta.rawset("__index", table);
 			meta.rawset("__type", NAME);
-			meta.rawset(Lib.MT_NAME, NAME);
+			meta.rawset(BasicLib.MT_NAME, NAME);
 
 			return table;
 		}
