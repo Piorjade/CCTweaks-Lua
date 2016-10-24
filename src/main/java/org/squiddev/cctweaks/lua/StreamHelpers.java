@@ -3,6 +3,7 @@ package org.squiddev.cctweaks.lua;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Scanner;
 
 public class StreamHelpers {
 	public static byte[] toByteArray(InputStream input) throws IOException {
@@ -17,5 +18,10 @@ public class StreamHelpers {
 		}
 
 		return output.toByteArray();
+	}
+
+	public static String toString(InputStream input) throws IOException {
+		Scanner s = new Scanner(input).useDelimiter("\\A");
+		return s.hasNext() ? s.next() : "";
 	}
 }

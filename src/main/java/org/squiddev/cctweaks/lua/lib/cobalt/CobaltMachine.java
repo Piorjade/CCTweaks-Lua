@@ -1,18 +1,14 @@
 package org.squiddev.cctweaks.lua.lib.cobalt;
 
 import dan200.computercraft.ComputerCraft;
-import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.ILuaObject;
-import dan200.computercraft.api.lua.ILuaTask;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.apis.ILuaAPI;
 import dan200.computercraft.core.computer.Computer;
-import dan200.computercraft.core.computer.IComputerEnvironment;
-import dan200.computercraft.core.computer.ITask;
-import dan200.computercraft.core.computer.MainThread;
 import dan200.computercraft.core.lua.ILuaMachine;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.lib.AbstractLuaContext;
 import org.squiddev.cobalt.*;
 import org.squiddev.cobalt.compiler.LoadState;
 import org.squiddev.cobalt.debug.DebugFrame;
@@ -24,16 +20,15 @@ import org.squiddev.cobalt.function.VarArgFunction;
 import org.squiddev.cobalt.lib.*;
 import org.squiddev.cobalt.lib.platform.AbstractResourceManipulator;
 import org.squiddev.cobalt.lib.profiler.ProfilerLib;
-import org.squiddev.patcher.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.ILLEGAL_NAMES;
+import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.getHost;
 import static org.squiddev.cobalt.Constants.NIL;
 import static org.squiddev.cobalt.Constants.NONE;
 import static org.squiddev.cobalt.ValueFactory.valueOf;
@@ -44,29 +39,7 @@ import static org.squiddev.cobalt.ValueFactory.varargsOf;
  *
  * @see dan200.computercraft.core.lua.LuaJLuaMachine
  */
-public class CobaltMachine implements ILuaMachine, ILuaContext {
-	private static final String[] ILLEGAL_NAMES = new String[]{
-		"collectgarbage",
-		"dofile",
-		"loadfile",
-		"print"
-	};
-
-	private static final Method getHost;
-
-	static {
-		Method host = null;
-		try {
-			host = IComputerEnvironment.class.getMethod("getHostString");
-		} catch (NoSuchMethodException ignored) {
-		} catch (RuntimeException e) {
-			Logger.error("Unknown error getting host string", e);
-		}
-
-		getHost = host;
-	}
-
-	private final Computer computer;
+public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 	private final LuaState state;
 	private final LuaTable globals;
 	private LuaThread mainThread;
@@ -76,7 +49,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 	private String softAbort = null;
 
 	public CobaltMachine(final Computer computer) {
-		this.computer = computer;
+		super(computer);
 
 		final LuaState state = this.state = new LuaState(new AbstractResourceManipulator() {
 			@Override
@@ -149,18 +122,8 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			globals.rawset(global, Constants.NIL);
 		}
 
-		if (getHost != null) {
-			try {
-				// We have to use reflection for different CC versions
-				globals.rawset("_HOST", valueOf((String) getHost.invoke(computer.getAPIEnvironment().getComputerEnvironment())));
-			} catch (InvocationTargetException e) {
-				Logger.error("Cannot find getHostString", e);
-			} catch (IllegalAccessException e) {
-				Logger.error("Cannot find getHostString", e);
-			} catch (RuntimeException e) {
-				Logger.error("Unknown error with setting _HOST", e);
-			}
-		}
+		String host = getHost(computer);
+		if (host != null) globals.rawset("_HOST", valueOf(host));
 
 		globals.rawset("_CC_VERSION", valueOf(ComputerCraft.getVersion()));
 		globals.rawset("_MC_VERSION", valueOf(Config.mcVersion));
@@ -312,7 +275,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 	}
 
 	//region Conversion
-	public LuaValue toValue(Object object, Map<Object, LuaValue> tables) {
+	private LuaValue toValue(Object object, Map<Object, LuaValue> tables) {
 		if (object == null) {
 			return NIL;
 		} else if (object instanceof Number) {
@@ -350,7 +313,7 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 		}
 	}
 
-	public Varargs toValues(Object[] objects) {
+	private Varargs toValues(Object[] objects) {
 		if (objects != null && objects.length != 0) {
 			LuaValue[] values = new LuaValue[objects.length];
 
@@ -367,21 +330,6 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 	//endregion
 
 	@Override
-	public Object[] pullEvent(String filter) throws LuaException, InterruptedException {
-		Object[] results = pullEventRaw(filter);
-		if (results.length >= 1 && results[0].equals("terminate")) {
-			throw new LuaException("Terminated", 0);
-		} else {
-			return results;
-		}
-	}
-
-	@Override
-	public Object[] pullEventRaw(String filter) throws InterruptedException {
-		return yield(new Object[]{filter});
-	}
-
-	@Override
 	public Object[] yield(Object[] objects) throws InterruptedException {
 		try {
 			Varargs results = LuaThread.yield(state, toValues(objects));
@@ -390,68 +338,6 @@ public class CobaltMachine implements ILuaMachine, ILuaContext {
 			throw new InterruptedException();
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	public Object[] executeMainThreadTask(final ILuaTask task) throws LuaException, InterruptedException {
-		long taskID = issueMainThreadTask(task);
-
-		Object[] response;
-		do {
-			do {
-				response = this.pullEvent("task_complete");
-			} while (response.length < 3);
-		}
-		while (!(response[1] instanceof Number) || !(response[2] instanceof Boolean) || (long) ((Number) response[1]).intValue() != taskID);
-
-		if (!(Boolean) response[2]) {
-			if (response.length >= 4 && response[3] instanceof String) {
-				throw new LuaException((String) response[3]);
-			} else {
-				throw new LuaException();
-			}
-		} else {
-			Object[] returnValues = new Object[response.length - 3];
-			System.arraycopy(response, 3, returnValues, 0, returnValues.length);
-			return returnValues;
-		}
-	}
-
-	@Override
-	public long issueMainThreadTask(final ILuaTask task) throws LuaException {
-		final long taskID = MainThread.getUniqueTaskID();
-		ITask generatedTask = new ITask() {
-			@Override
-			public Computer getOwner() {
-				return computer;
-			}
-
-			@Override
-			public void execute() {
-				try {
-					Object[] t = task.execute();
-					if (t != null) {
-						Object[] eventArguments = new Object[t.length + 2];
-						eventArguments[0] = taskID;
-						eventArguments[1] = true;
-						System.arraycopy(t, 0, eventArguments, 2, t.length);
-
-						computer.queueEvent("task_complete", eventArguments);
-					} else {
-						computer.queueEvent("task_complete", new Object[]{taskID, true});
-					}
-				} catch (LuaException e) {
-					computer.queueEvent("task_complete", new Object[]{taskID, false, e.getMessage()});
-				} catch (Throwable e) {
-					computer.queueEvent("task_complete", new Object[]{taskID, false, "Java Exception Thrown: " + e.toString()});
-				}
-			}
-		};
-		if (MainThread.queueTask(generatedTask)) {
-			return taskID;
-		} else {
-			throw new LuaException("Task limit exceeded");
 		}
 	}
 

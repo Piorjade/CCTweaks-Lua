@@ -25,6 +25,7 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
+import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.BinaryConverter;
@@ -39,11 +40,11 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
 
-public class SocketConnection implements ILuaObjectWithArguments {
-	private static final ScheduledExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads);
+public class SocketConnection implements ILuaObjectWithArguments, IMethodDescriptor {
+	private static final ExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads, ThreadBuilder.LOW_PRIORITY);
 
 	private final SocketAPI owner;
 
@@ -221,5 +222,10 @@ public class SocketConnection implements ILuaObjectWithArguments {
 			default:
 				return null;
 		}
+	}
+
+	@Override
+	public boolean willYield(int method) {
+		return false;
 	}
 }

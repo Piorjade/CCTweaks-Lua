@@ -15,6 +15,7 @@ import org.squiddev.cctweaks.lua.lib.cobalt.CobaltMachine;
 import org.squiddev.cctweaks.lua.lib.luaj.BigIntegerValue;
 import org.squiddev.cctweaks.lua.lib.luaj.BitOpLib;
 import org.squiddev.cctweaks.lua.lib.luaj.LuaJArguments;
+import org.squiddev.cctweaks.lua.lib.rembulan.RembulanMachine;
 import org.squiddev.patcher.Logger;
 
 import java.lang.reflect.Field;
@@ -60,6 +61,8 @@ public class LuaHelpers {
 	public static ILuaMachine createMachine(Computer computer) {
 		if (Config.Computer.cobalt) {
 			return new CobaltMachine(computer);
+		} else if (Config.Computer.rembulan) {
+			return new RembulanMachine(computer);
 		} else {
 			LuaJLuaMachine machine = new LuaJLuaMachine(computer);
 			LuaTable env = null;

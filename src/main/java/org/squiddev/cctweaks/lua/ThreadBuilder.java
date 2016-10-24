@@ -1,18 +1,25 @@
 package org.squiddev.cctweaks.lua;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Helper methods for various things
  */
 public class ThreadBuilder {
-	public static int THREAD_PRIORITY = Thread.MIN_PRIORITY + (Thread.NORM_PRIORITY - Thread.MIN_PRIORITY) / 2;
+	public static int LOW_PRIORITY = Thread.MIN_PRIORITY + (Thread.NORM_PRIORITY - Thread.MIN_PRIORITY) / 2;
+	public static int NORM_PRIORITY = Thread.NORM_PRIORITY;
 
-	public static ScheduledExecutorService createThread(String name, int threads) {
-		return Executors.newScheduledThreadPool(threads, getFactory(name, THREAD_PRIORITY));
+	public static ThreadPoolExecutor createThread(String name, int minThreads, int maxThreads, final int priority) {
+		return new ThreadPoolExecutor(
+			minThreads, maxThreads,
+			60L, TimeUnit.SECONDS,
+			new SynchronousQueue<Runnable>(),
+			getFactory(name, priority)
+		);
 	}
 
 	public static ThreadFactory getFactory(String name, final int priority) {
@@ -32,5 +39,9 @@ public class ThreadBuilder {
 				return thread;
 			}
 		};
+	}
+
+	public static ThreadPoolExecutor createThread(String name, int threads, int priority) {
+		return createThread(name, threads, threads, priority);
 	}
 }

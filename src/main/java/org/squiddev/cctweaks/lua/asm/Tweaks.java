@@ -14,6 +14,7 @@ public class Tweaks {
 		chain.addPatchFile("org.luaj.vm2.lib.StringLib");
 
 		chain.add(new AddAdditionalData());
+		chain.add(new AddMethodDescriptor());
 		chain.add(new CustomAPIs());
 		chain.add(new CustomBios());
 		chain.add(new CustomMachine());

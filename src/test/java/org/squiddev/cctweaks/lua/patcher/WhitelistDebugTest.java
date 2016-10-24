@@ -9,21 +9,21 @@ import java.util.List;
 
 @RunWith(Parameterized.class)
 public class WhitelistDebugTest {
-	@Parameterized.Parameters(name = "Version: {0}, Cobalt: {1}")
+	@Parameterized.Parameters(name = "Version: {0}, Runtime: {1}")
 	public static List<Object[]> getVersions() {
-		return VersionHandler.getVersionsWithCobalt();
+		return VersionHandler.getVersionsWithRuntimes();
 	}
 
 	@Parameterized.Parameter
 	public String version;
 
 	@Parameterized.Parameter(1)
-	public String cobalt;
+	public String runtime;
 
 	@Test
 	public void assertWorks() throws Throwable {
 		System.setProperty("cctweaks.APIs.debug", "true");
-		System.setProperty("cctweaks.Computer.cobalt", cobalt);
+		VersionHandler.setup(runtime);
 
 		RewritingLoader loader = VersionHandler.getLoader(version);
 		VersionHandler.run(loader, "assert.assert(debug, 'Expected debug API')");

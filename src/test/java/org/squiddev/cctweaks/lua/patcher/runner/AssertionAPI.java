@@ -6,12 +6,13 @@ import dan200.computercraft.core.apis.ILuaAPI;
 import org.junit.Assert;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
+import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.patcher.Logger;
 
 /**
  * Adds various assertions to Lua
  */
-public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments {
+public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments, IMethodDescriptor {
 	private Throwable exception;
 
 	@Override
@@ -97,5 +98,10 @@ public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments {
 
 	public Throwable getException() {
 		return exception;
+	}
+
+	@Override
+	public boolean willYield(int method) {
+		return false;
 	}
 }
