@@ -40,7 +40,6 @@ import static org.squiddev.cobalt.ValueFactory.varargsOf;
  * @see dan200.computercraft.core.lua.LuaJLuaMachine
  */
 public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
-	private final Computer computer;
 	private final LuaState state;
 	private final LuaTable globals;
 	private LuaThread mainThread;
@@ -49,9 +48,8 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 	private String hardAbort = null;
 	private String softAbort = null;
 
-	public CobaltMachine(Computer computer) {
+	public CobaltMachine(final Computer computer) {
 		super(computer);
-		this.computer = computer;
 
 		final LuaState state = this.state = new LuaState(new AbstractResourceManipulator() {
 			@Override
@@ -60,7 +58,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 			}
 		});
 
-		if (Config.Computer.luaJC) FallbackLuaJC.install(state);
+		if (Config.Computer.LuaJC.enabled) FallbackLuaJC.install(state);
 
 		state.debug = new DebugHandler(state) {
 			private int count = 0;

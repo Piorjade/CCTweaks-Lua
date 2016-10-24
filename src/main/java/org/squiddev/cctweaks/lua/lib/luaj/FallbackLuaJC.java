@@ -14,8 +14,8 @@ public final class FallbackLuaJC {
 	public static void install() {
 		LuaJC.install(new CompileOptions(
 			CompileOptions.PREFIX,
-			CompileOptions.THRESHOLD,
-			Config.Computer.luaJCVerify,
+			Config.Computer.LuaJC.threshold,
+			Config.Computer.LuaJC.verify,
 			handler
 		));
 	}
