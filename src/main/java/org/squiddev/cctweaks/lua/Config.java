@@ -24,7 +24,7 @@ public final class Config {
 			Computer.biosPath = BIOS_PATH;
 		}
 
-		if (Computer.MultiThreading.enabled && Computer.MultiThreading.threads > 1 && !Computer.cobalt) {
+		if (Computer.MultiThreading.enabled && Computer.MultiThreading.threads > 1 && !Computer.cobalt && !Computer.rembulan) {
 			Logger.warn("Can only have 1 thread when running on LuaJ, reverting to default");
 			Computer.MultiThreading.threads = 1;
 		}
