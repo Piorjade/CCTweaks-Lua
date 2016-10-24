@@ -7,10 +7,7 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.apis.ILuaAPI;
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.lua.ILuaMachine;
-import net.sandius.rembulan.LuaRuntimeException;
-import net.sandius.rembulan.StateContext;
-import net.sandius.rembulan.Table;
-import net.sandius.rembulan.Variable;
+import net.sandius.rembulan.*;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallPausedException;
@@ -25,7 +22,6 @@ import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.StreamHelpers;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.AbstractLuaContext;
-import org.squiddev.cctweaks.lua.lib.BinaryConverter;
 import org.squiddev.patcher.Logger;
 
 import java.io.InputStream;
@@ -157,8 +153,14 @@ public class RembulanMachine implements ILuaMachine {
 					return;
 				}
 
-				if (results != null && results.length > 0 && results[0] instanceof String) {
-					eventFilter = results[0].toString();
+				if (results != null && results.length > 0) {
+					if (results[0] instanceof ByteString) {
+						eventFilter = ((ByteString) results[0]).toRawString();
+					} else if (results[0] instanceof String) {
+						eventFilter = (String) results[0];
+					} else {
+						eventFilter = null;
+					}
 				} else {
 					eventFilter = null;
 				}
@@ -200,10 +202,12 @@ public class RembulanMachine implements ILuaMachine {
 	}
 
 	private Object toValue(Object object, Map<Object, Table> tables) {
-		if (object == null || object instanceof Number || object instanceof Boolean || object instanceof String) {
+		if (object == null || object instanceof Number || object instanceof Boolean) {
 			return object;
 		} else if (object instanceof byte[]) {
-			return BinaryConverter.decodeString((byte[]) object);
+			return ByteString.copyOf((byte[]) object);
+		} else if (object instanceof String) {
+			return ByteString.fromRaw((String) object);
 		} else if (object instanceof Map) {
 			if (tables == null) {
 				tables = new IdentityHashMap<Object, Table>();

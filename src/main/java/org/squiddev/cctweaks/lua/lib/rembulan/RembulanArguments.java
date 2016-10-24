@@ -1,6 +1,7 @@
 package org.squiddev.cctweaks.lua.lib.rembulan;
 
 import dan200.computercraft.api.lua.LuaException;
+import net.sandius.rembulan.ByteString;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.lua.lib.BinaryConverter;
 
@@ -51,6 +52,8 @@ public class RembulanArguments implements IArguments {
 		Object value = get(index);
 		if (value instanceof String) {
 			return (String) value;
+		} else if (value instanceof ByteString) {
+			return ((ByteString) value).toRawString();
 		} else {
 			throw new LuaException("Expected string");
 		}
@@ -61,6 +64,8 @@ public class RembulanArguments implements IArguments {
 		Object value = get(index);
 		if (value instanceof String) {
 			return BinaryConverter.toBytes((String) value);
+		} else if (value instanceof ByteString) {
+			return ((ByteString) value).getBytes();
 		} else {
 			throw new LuaException("Expected string");
 		}

@@ -1,5 +1,6 @@
 package org.squiddev.cctweaks.lua.lib.rembulan;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Table;
 import org.squiddev.cctweaks.lua.lib.BinaryConverter;
 import org.squiddev.cctweaks.lua.lib.luaj.LuaJConverter;
@@ -24,6 +25,8 @@ public class RembulanConverter {
 			return ((Number) value).doubleValue();
 		} else if (value instanceof String) {
 			return binary ? BinaryConverter.toBytes((String) value) : value;
+		} else if (value instanceof ByteString) {
+			return binary ? ((ByteString) value).getBytes() : ((ByteString) value).toRawString();
 		} else if (value instanceof Table) {
 			if (tables == null) {
 				tables = new IdentityHashMap<Table, Object>();
