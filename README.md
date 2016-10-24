@@ -20,22 +20,28 @@ This will inject CCTweaks into the class loader, adding modifications.
  - [Cobalt](https://github.com/SquidDev/Cobalt) VM (reentrant fork of LuaJ)
    - Custom termination handler
    - Several bugs fixed (any object error messages, string pattern matching, number format strings)
+   - Run multiple computers at once
+ - [Rembulan](https://github.com/mjanicek/rembulan) VM (Lua 5.3 for the JVM)
  - Return HTTP handle on failures
  - Allow getting headers from HTTP responses
  - API for adding custom APIs
+ - Limit number of open file handles
+ - Boot from custom `bios.lua` file
 
 ## Documentation
 There is extensive documentation on the [CCTweaks-Lua wiki](https://github.com/SquidDev-CC/CCTweaks-Lua/wiki).
 
 ### Basic options
-Most tweaks are applied by default, though some can be configured through the command line:
- - `-Dcctweaks.Computer.luaJC=true`: Enable LuaJC compilation (a `luaJC` flag also exists).
+Whilst there are several tweaks applied by default, many more can be explicitly enabled
+via the command line or (if in Minecraft) through the config GUI. Some useful options are as 
+follows - full documentation can be found in the 
+[documentation](https://github.com/SquidDev-CC/CCTweaks-Lua/wiki).
+
+ - `-Dcctweaks.Computer.LuaJC.enabled=true`: Enable LuaJC compilation (a `luaJC` flag also exists).
  - `-Dcctweaks.Computer.cobalt=true`: Enable the [Cobalt VM](https://github.com/SquidDev/Cobalt).
  - `-Dcctweaks.Computer.computerThreadTimeout=7000`: Set the computer thread timeout. Time is measured in milliseconds.
- - `-Dcctweaks.Computer.timeoutError=true`: Enable timeouts anywhere, rather than just from CC functions.
- - `-Dcctweaks.APIs.Socket.blacklist=127.0.0.0/8,10.0.0.0/8`: Configure the socket blacklist (can also do `whitelist`).
+ - `-Dcctweaks.Computer.timeoutError=true`: Enable timeouts anywhere, rather than just from CC functions (Cobalt only).
  - `-Dcctweaks.APIs.debug=true`: Enable the debug API.
- - `-Dcctweaks.APIs.profiler=true`: Enable the profiler API.
 
 ### CCEmuRedux
 This project is partly aimed at CCEmuRedux and so contains a custom launcher for CCEmuRedux.
