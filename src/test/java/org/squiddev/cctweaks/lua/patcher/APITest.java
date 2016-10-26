@@ -38,4 +38,9 @@ public class APITest {
 	public void testBigInt() throws Throwable {
 		VersionHandler.runFile(loader, "bigint");
 	}
+
+	@Test
+	public void testYield() throws Throwable {
+		VersionHandler.runFile(loader, "yield");
+	}
 }

@@ -1,6 +1,7 @@
 package org.squiddev.cctweaks.lua.patcher.runner;
 
 import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.ILuaTask;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.apis.ILuaAPI;
 import org.junit.Assert;
@@ -34,7 +35,7 @@ public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments, IMethodDe
 
 	@Override
 	public String[] getMethodNames() {
-		return new String[]{"assert", "assertEquals", "debug"};
+		return new String[]{"assert", "assertEquals", "debug", "oneTick"};
 	}
 
 	private String getMessage(Object[] objects, int index) {
@@ -82,6 +83,13 @@ public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments, IMethodDe
 					Logger.debug(buffer.toString());
 					return null;
 				}
+				case 3:
+					return context.executeMainThreadTask(new ILuaTask() {
+						@Override
+						public Object[] execute() throws LuaException {
+							return new Object[]{"One tick later"};
+						}
+					});
 			}
 
 			return null;
@@ -102,6 +110,6 @@ public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments, IMethodDe
 
 	@Override
 	public boolean willYield(int method) {
-		return false;
+		return method == 3;
 	}
 }

@@ -3,6 +3,7 @@ package org.squiddev.cctweaks.lua.patcher.runner;
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.computer.ComputerThread;
 import dan200.computercraft.core.computer.ITask;
+import dan200.computercraft.core.computer.MainThread;
 import dan200.computercraft.core.terminal.Terminal;
 import org.junit.Assert;
 import org.squiddev.cctweaks.lua.patcher.utils.Notifier;
@@ -44,6 +45,7 @@ public class RunOnComputer {
 				}, computer);
 
 				waiter.doWait();
+				MainThread.executePendingTasks();
 
 				Throwable exception = api.getException();
 				if (exception != null) {

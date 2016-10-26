@@ -231,6 +231,7 @@ public class RembulanMachine implements ILuaMachine {
 		} else if (object instanceof ILuaObject) {
 			return wrapLuaObject((ILuaObject) object);
 		} else {
+			Logger.warn("Discarding " + object.getClass());
 			return null;
 		}
 	}
@@ -320,6 +321,7 @@ public class RembulanMachine implements ILuaMachine {
 				} catch (InterruptedException e) {
 					throw e;
 				} catch (Throwable e) {
+					Logger.error("Within handler", e);
 					throw new LuaRuntimeException("Java exception thrown " + e.getMessage());
 				}
 			} else {
@@ -379,7 +381,7 @@ public class RembulanMachine implements ILuaMachine {
 		public Object[] yield(Object[] objects) throws InterruptedException {
 			if (done) throw new IllegalStateException("Cannot yield when complete");
 
-			values = objects;
+			values = toValues(objects);
 
 			externalLock.signal();
 			try {
@@ -395,7 +397,7 @@ public class RembulanMachine implements ILuaMachine {
 				throw e;
 			}
 
-			return toValues(values);
+			return RembulanConverter.toObjects(values, 0, false);
 		}
 
 		public void resume(Object[] objects) throws InterruptedException {

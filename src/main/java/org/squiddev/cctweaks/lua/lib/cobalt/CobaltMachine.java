@@ -333,7 +333,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 	public Object[] yield(Object[] objects) throws InterruptedException {
 		try {
 			Varargs results = LuaThread.yield(state, toValues(objects));
-			return CobaltConverter.toObjects(results, 0, false);
+			return CobaltConverter.toObjects(results, 1, false);
 		} catch (OrphanedThread e) {
 			throw new InterruptedException();
 		} catch (Throwable e) {
