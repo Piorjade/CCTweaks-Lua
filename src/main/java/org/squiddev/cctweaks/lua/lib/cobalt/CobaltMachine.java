@@ -127,7 +127,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 
 		globals.rawset("_CC_VERSION", valueOf(ComputerCraft.getVersion()));
 		globals.rawset("_MC_VERSION", valueOf(Config.mcVersion));
-		globals.rawset("_LUAJ_VERSION", valueOf("Cobalt 0.1"));
+		globals.rawset("_LUAJ_VERSION", valueOf("Cobalt 0.2.1"));
 		if (ComputerCraft.disable_lua51_features) {
 			globals.rawset("_CC_DISABLE_LUA51_FEATURES", Constants.TRUE);
 		}

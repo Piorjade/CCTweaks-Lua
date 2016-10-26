@@ -51,7 +51,7 @@ dependencies {
 	}
 
 	shade 'org.squiddev:Patcher:1.1.1.1'
-	shade 'org.squiddev:Cobalt:0.2.1'
+	shade 'org.squiddev:Cobalt:0.2.1' // Remember to bump this in CobaltMachine too
 	shade 'org.squiddev:cobalt.luajc:1.1.0'
 
 	compile 'org.squiddev:ConfigGen:1.2.5'
