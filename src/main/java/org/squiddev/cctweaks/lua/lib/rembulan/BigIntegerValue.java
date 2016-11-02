@@ -8,9 +8,10 @@ import net.sandius.rembulan.lib.AbstractLibFunction;
 import net.sandius.rembulan.lib.ArgumentIterator;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.runtime.ExecutionContext;
+import org.squiddev.cctweaks.lua.lib.RandomProvider;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public final class BigIntegerValue extends DefaultUserdata {
 	private static final String NAME = "biginteger";
@@ -66,17 +67,19 @@ public final class BigIntegerValue extends DefaultUserdata {
 
 		private static final String[] MAIN_NAMES = new String[]{
 			"new", "modinv", "gcd", "modpow", "abs", "min", "max",
-			"isProbPrime", "nextProbPrime", "newProbPrime"
+			"isProbPrime", "nextProbPrime", "newProbPrime", "seed",
 		};
 
 		private final String name;
 		private final Table metatable;
 		private final int opcode;
+		private final RandomProvider random;
 
-		private BigIntegerFunction(String name, Table metatable, int opcode) {
+		private BigIntegerFunction(String name, Table metatable, int opcode, RandomProvider random) {
 			this.name = name;
 			this.metatable = metatable;
 			this.opcode = opcode;
+			this.random = random;
 		}
 
 		public Object call(ArgumentIterator iterator) {
@@ -196,8 +199,22 @@ public final class BigIntegerValue extends DefaultUserdata {
 					}
 					case 28: { // newProbPrime
 						int length = iterator.nextInt();
-						Random seed = new Random(iterator.nextInteger());
+						SecureRandom seed;
+						if (iterator.remaining() == 0) {
+							seed = random.get();
+						} else {
+							seed = RandomProvider.create();
+							seed.setSeed(getValue(iterator).toByteArray());
+						}
 						return new BigIntegerValue(BigInteger.probablePrime(length, seed), metatable);
+					}
+					case 29: { // seed
+						if (iterator.remaining() == 0) {
+							random.seed();
+						} else {
+							random.seed(getValue(iterator));
+						}
+						return null;
 					}
 					default:
 						throw new LuaRuntimeException("No such method " + opcode);
@@ -222,14 +239,16 @@ public final class BigIntegerValue extends DefaultUserdata {
 			Table meta = state.newTable(0, META_NAMES.length + 2);
 			Table table = state.newTable(0, META_NAMES.length + MAIN_NAMES.length);
 
+			RandomProvider random = new RandomProvider();
+
 			for (int i = 0; i < META_NAMES.length; i++) {
-				BigIntegerFunction func = new BigIntegerFunction(META_NAMES[i], meta, i);
+				BigIntegerFunction func = new BigIntegerFunction(META_NAMES[i], meta, i, random);
 				table.rawset(META_NAMES[i], func);
 				meta.rawset("__" + META_NAMES[i], func);
 			}
 
 			for (int i = 0; i < MAIN_NAMES.length; i++) {
-				BigIntegerFunction func = new BigIntegerFunction(MAIN_NAMES[i], meta, i + META_NAMES.length);
+				BigIntegerFunction func = new BigIntegerFunction(MAIN_NAMES[i], meta, i + META_NAMES.length, random);
 				table.rawset(MAIN_NAMES[i], func);
 			}
 

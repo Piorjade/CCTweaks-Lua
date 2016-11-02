@@ -1,10 +1,11 @@
 package org.squiddev.cctweaks.lua.lib.cobalt;
 
+import org.squiddev.cctweaks.lua.lib.RandomProvider;
 import org.squiddev.cobalt.*;
 import org.squiddev.cobalt.function.ThreeArgFunction;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import static org.squiddev.cobalt.Constants.*;
 import static org.squiddev.cobalt.ValueFactory.valueOf;
@@ -134,7 +135,7 @@ public final class BigIntegerValue extends LuaValue {
 		}
 	}
 
-	private static class BigIntegerFunction extends ThreeArgFunction {
+	private static final class BigIntegerFunction extends ThreeArgFunction {
 		private static final String[] META_NAMES = new String[]{
 			"unm", "add", "sub", "mul", "mod", "pow", "div", "idiv",
 			"band", "bor", "bxor", "shl", "shr", "bnot",
@@ -144,15 +145,15 @@ public final class BigIntegerValue extends LuaValue {
 
 		private static final String[] MAIN_NAMES = new String[]{
 			"new", "modinv", "gcd", "modpow", "abs", "min", "max",
-			"isProbPrime", "nextProbPrime", "newProbPrime"
+			"isProbPrime", "nextProbPrime", "newProbPrime", "seed",
 		};
 
-		private static final int CREATE_INDEX = 19;
+		private final LuaTable metatable;
+		private final RandomProvider random;
 
-		private LuaTable metatable;
-
-		private BigIntegerFunction(LuaTable metatable) {
+		private BigIntegerFunction(LuaTable metatable, RandomProvider random) {
 			this.metatable = metatable;
+			this.random = random;
 		}
 
 		@Override
@@ -278,8 +279,22 @@ public final class BigIntegerValue extends LuaValue {
 					}
 					case 28: { // newProbPrime
 						int length = left.checkInteger();
-						Random seed = right.isNil() ? state.random : new Random(right.checkInteger());
+						SecureRandom seed;
+						if (right.isNil()) {
+							seed = random.get();
+						} else {
+							seed = RandomProvider.create();
+							seed.setSeed(getValue(right).toByteArray());
+						}
 						return new BigIntegerValue(BigInteger.probablePrime(length, seed), metatable);
+					}
+					case 29: { // seed
+						if (left.isNil()) {
+							random.seed();
+						} else {
+							random.seed(getValue(left));
+						}
+						return null;
 					}
 					default:
 						throw new LuaError("No such method " + opcode);
@@ -294,8 +309,10 @@ public final class BigIntegerValue extends LuaValue {
 			LuaTable meta = new LuaTable(0, META_NAMES.length + 2);
 			LuaTable table = new LuaTable(0, META_NAMES.length + MAIN_NAMES.length);
 
+			RandomProvider random = new RandomProvider();
+
 			for (int i = 0; i < META_NAMES.length; i++) {
-				BigIntegerFunction func = new BigIntegerFunction(meta);
+				BigIntegerFunction func = new BigIntegerFunction(meta, random);
 				func.opcode = i;
 				func.name = META_NAMES[i];
 				func.env = env;
@@ -304,7 +321,7 @@ public final class BigIntegerValue extends LuaValue {
 			}
 
 			for (int i = 0; i < MAIN_NAMES.length; i++) {
-				BigIntegerFunction func = new BigIntegerFunction(meta);
+				BigIntegerFunction func = new BigIntegerFunction(meta, random);
 				func.opcode = i + META_NAMES.length;
 				func.name = MAIN_NAMES[i];
 				func.env = env;

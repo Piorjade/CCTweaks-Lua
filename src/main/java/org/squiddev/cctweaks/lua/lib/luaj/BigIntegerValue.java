@@ -2,9 +2,10 @@ package org.squiddev.cctweaks.lua.lib.luaj;
 
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.ThreeArgFunction;
+import org.squiddev.cctweaks.lua.lib.RandomProvider;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class BigIntegerValue extends LuaValue {
 	private static final String NAME = "biginteger";
@@ -182,15 +183,14 @@ public class BigIntegerValue extends LuaValue {
 
 		private static final String[] MAIN_NAMES = new String[]{
 			"new", "modinv", "gcd", "modpow", "abs", "min", "max",
-			"isProbPrime", "nextProbPrime", "newProbPrime"
+			"isProbPrime", "nextProbPrime", "newProbPrime", "seed",
 		};
+		private final LuaTable metatable;
+		private final RandomProvider random;
 
-		private static final int CREATE_INDEX = 19;
-
-		private LuaTable metatable;
-
-		private BigIntegerFunction(LuaTable metatable) {
+		private BigIntegerFunction(LuaTable metatable, RandomProvider random) {
 			this.metatable = metatable;
+			this.random = random;
 		}
 
 		@Override
@@ -316,8 +316,22 @@ public class BigIntegerValue extends LuaValue {
 					}
 					case 28: { // newProbPrime
 						int length = left.checkint();
-						Random seed = new Random(right.checkint());
+						SecureRandom seed;
+						if (right.isnil()) {
+							seed = random.get();
+						} else {
+							seed = RandomProvider.create();
+							seed.setSeed(getValue(right).toByteArray());
+						}
 						return new BigIntegerValue(BigInteger.probablePrime(length, seed), metatable);
+					}
+					case 29: { // seed
+						if (left.isnil()) {
+							random.seed();
+						} else {
+							random.seed(getValue(left));
+						}
+						return null;
 					}
 					default:
 						throw new LuaError("No such method " + opcode);
@@ -332,8 +346,10 @@ public class BigIntegerValue extends LuaValue {
 			LuaTable meta = new LuaTable(0, META_NAMES.length + 2);
 			LuaTable table = new LuaTable(0, META_NAMES.length + MAIN_NAMES.length);
 
+			RandomProvider random = new RandomProvider();
+
 			for (int i = 0; i < META_NAMES.length; i++) {
-				BigIntegerFunction func = new BigIntegerFunction(meta);
+				BigIntegerFunction func = new BigIntegerFunction(meta, random);
 				func.opcode = i;
 				func.name = META_NAMES[i];
 				func.env = env;
@@ -342,7 +358,7 @@ public class BigIntegerValue extends LuaValue {
 			}
 
 			for (int i = 0; i < MAIN_NAMES.length; i++) {
-				BigIntegerFunction func = new BigIntegerFunction(meta);
+				BigIntegerFunction func = new BigIntegerFunction(meta, random);
 				func.opcode = i + META_NAMES.length;
 				func.name = MAIN_NAMES[i];
 				func.env = env;
