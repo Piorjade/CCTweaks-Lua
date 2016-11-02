@@ -50,7 +50,7 @@ dependencies {
 		exclude group: 'org.luaj'
 	}
 
-	shade 'org.squiddev:Patcher:1.2.1'
+	shade 'org.squiddev:Patcher:1.2.3'
 	shade 'org.squiddev:Cobalt:0.2.1' // Remember to bump this in CobaltMachine too
 	shade 'org.squiddev:cobalt.luajc:1.1.0'
 
