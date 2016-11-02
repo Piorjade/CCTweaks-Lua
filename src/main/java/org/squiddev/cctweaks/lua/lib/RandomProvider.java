@@ -19,9 +19,14 @@ public final class RandomProvider {
 		SecureRandom random = this.random;
 		if (random == null) {
 			try {
+			try {
 				random = SecureRandom.getInstance("SHA1PRNG");
 			} catch (NoSuchAlgorithmException e) {
 				random = new SecureRandom();
+			}
+			} catch(Throwable e) {
+				e.printStackTrace();
+				throw new RuntimeException(e.getMessage());
 			}
 			this.random = random;
 		}
@@ -35,7 +40,7 @@ public final class RandomProvider {
 
 	public void seed() {
 		SecureRandom random = get();
-		random.setSeed(random.generateSeed(128));
+		random.setSeed(random.generateSeed(4));
 		this.random = random;
 	}
 }
