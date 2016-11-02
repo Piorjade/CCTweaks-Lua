@@ -294,7 +294,7 @@ public final class BigIntegerValue extends LuaValue {
 						} else {
 							random.seed(getValue(left));
 						}
-						return null;
+						return NONE;
 					}
 					default:
 						throw new LuaError("No such method " + opcode);
