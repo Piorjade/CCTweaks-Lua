@@ -19,6 +19,7 @@ import org.squiddev.cctweaks.lua.lib.rembulan.RembulanMachine;
 import org.squiddev.patcher.Logger;
 
 import java.lang.reflect.Field;
+import java.util.regex.Pattern;
 
 /**
  * Various classes for helping with Lua conversion
@@ -79,6 +80,20 @@ public class LuaHelpers {
 
 			return machine;
 		}
+	}
+
+	private static final Pattern INVALID_PATTERN = Pattern.compile("[^ -~]");
+
+	public static String limitLabel(String label) {
+		if (Config.Computer.limitedLabels) {
+			label = INVALID_PATTERN.matcher(label).replaceAll("");
+		}
+
+		if (label.length() > 32) {
+			label = label.substring(0, 32);
+		}
+
+		return label;
 	}
 
 	private static Field getGlobals = null;

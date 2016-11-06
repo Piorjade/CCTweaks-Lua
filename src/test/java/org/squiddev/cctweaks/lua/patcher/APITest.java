@@ -43,4 +43,9 @@ public class APITest {
 	public void testYield() throws Throwable {
 		VersionHandler.runFile(loader, "yield");
 	}
+
+	@Test
+	public void testLabels() throws Throwable {
+		VersionHandler.runFile(loader, "label");
+	}
 }

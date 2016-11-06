@@ -108,6 +108,12 @@ public final class Config {
 		public static int maxFilesHandles;
 
 		/**
+		 * Remove non-printable, non-ASCII characters from labels
+		 */
+		@DefaultBoolean(true)
+		public static boolean limitedLabels;
+
+		/**
 		 * Compile Lua bytecode to Java bytecode.
 		 * This speeds up code execution.
 		 */
