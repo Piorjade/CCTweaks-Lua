@@ -5,6 +5,7 @@ import dan200.computercraft.core.computer.ComputerThread;
 import dan200.computercraft.core.computer.ITask;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
+import org.squiddev.cctweaks.lua.lib.ComputerMonitor;
 import org.squiddev.patcher.Logger;
 
 import java.util.HashSet;
@@ -150,6 +151,7 @@ public class ComputerThread_Rewrite {
 				});
 
 				// Execute the task
+				long start = System.currentTimeMillis();
 				try {
 					worker.get(Config.Computer.computerThreadTimeout, TimeUnit.MILLISECONDS);
 				} catch (TimeoutException ignored) {
@@ -179,6 +181,13 @@ public class ComputerThread_Rewrite {
 					if (!worker.isDone()) {
 						worker.cancel(true);
 					}
+				}
+
+				long end = System.currentTimeMillis();
+				Computer owner = task.getOwner();
+				if (owner != null) {
+					ComputerMonitor monitor = ComputerMonitor.get();
+					if (monitor != null) monitor.increment(owner, end - start);
 				}
 			} catch (InterruptedException ignored) {
 			} catch (ExecutionException e) {
