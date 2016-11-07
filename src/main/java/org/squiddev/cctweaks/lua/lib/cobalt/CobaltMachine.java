@@ -133,6 +133,10 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 		}
 	}
 
+	public void injectDebug() {
+		globals.load(state, new DebugLib());
+	}
+
 	@Override
 	public void addAPI(ILuaAPI api) {
 		LuaValue table = wrapLuaObject(api);

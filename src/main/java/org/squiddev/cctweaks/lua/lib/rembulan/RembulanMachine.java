@@ -84,6 +84,10 @@ public class RembulanMachine implements ILuaMachine {
 		}
 	}
 
+	public void injectDebug() {
+		DebugLib.installInto(state, globals);
+	}
+
 	@Override
 	public void addAPI(ILuaAPI api) {
 		Table table = wrapLuaObject(api);
