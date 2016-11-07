@@ -19,7 +19,8 @@ public class VersionHandler {
 		return Arrays.asList(
 			new Object[]{"1.75"},
 			new Object[]{"1.78"},
-			new Object[]{"1.79"}
+			new Object[]{"1.79"},
+			new Object[]{"1.80pr0"}
 		);
 	}
 
