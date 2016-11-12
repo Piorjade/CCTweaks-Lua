@@ -85,6 +85,8 @@ public class LuaHelpers {
 	private static final Pattern INVALID_PATTERN = Pattern.compile("[^ -~]");
 
 	public static String limitLabel(String label) {
+		if (label == null) return null;
+
 		if (Config.Computer.limitedLabels) {
 			label = INVALID_PATTERN.matcher(label).replaceAll("");
 		}
