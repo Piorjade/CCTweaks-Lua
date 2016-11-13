@@ -167,6 +167,14 @@ public final class Config {
 			@DefaultInt(1)
 			@Range(min = 1)
 			public static int threads;
+
+			/**
+			 * The priority for computer threads. A lower number means
+			 * they will take up less CPU time but as a result will run slower.
+			 */
+			@DefaultInt(Thread.NORM_PRIORITY)
+			@Range(min = Thread.MIN_PRIORITY, max = Thread.MAX_PRIORITY)
+			public static int priority;
 		}
 	}
 

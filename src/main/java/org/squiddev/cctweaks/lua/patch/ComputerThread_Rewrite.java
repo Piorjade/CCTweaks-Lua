@@ -55,8 +55,8 @@ public class ComputerThread_Rewrite {
 	 */
 	private static Thread[] threads = null;
 
-	private static final ThreadFactory mainFactory = ThreadBuilder.getFactory("Computer-Tasks", Thread.NORM_PRIORITY);
-	private static final ThreadFactory delegateFacotry = ThreadBuilder.getFactory("Computer-Delegate", Thread.NORM_PRIORITY);
+	private static final ThreadFactory mainFactory = ThreadBuilder.getFactory("Computer-Tasks", Config.Computer.MultiThreading.priority);
+	private static final ThreadFactory delegateFacotry = ThreadBuilder.getFactory("Computer-Delegate", Config.Computer.MultiThreading.priority);
 
 	/**
 	 * Start the computer thread
