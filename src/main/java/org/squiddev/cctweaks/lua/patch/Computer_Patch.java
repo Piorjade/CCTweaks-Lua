@@ -31,14 +31,17 @@ public class Computer_Patch extends Computer {
 		}
 	}
 
+	public boolean isMostlyOn() {
+		synchronized (this) {
+			return m_state != State.Off && m_machine != null;
+		}
+	}
+
 	@MergeVisitor.Stub
-	private static enum State {
+	private enum State {
 		Off,
 		Starting,
 		Running,
-		Stopping;
-
-		private State() {
-		}
+		Stopping,
 	}
 }
