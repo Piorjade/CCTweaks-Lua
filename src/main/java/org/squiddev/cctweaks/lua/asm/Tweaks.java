@@ -1,6 +1,7 @@
 package org.squiddev.cctweaks.lua.asm;
 
 import org.squiddev.cctweaks.lua.asm.binary.BinaryUtils;
+import org.squiddev.patcher.transformer.ClassMerger;
 import org.squiddev.patcher.transformer.ClassReplacer;
 import org.squiddev.patcher.transformer.IPatcher;
 import org.squiddev.patcher.transformer.ISource;
@@ -23,6 +24,12 @@ public class Tweaks {
 		chain.add(new InjectLuaJC());
 		chain.add(new LimitLabel());
 		chain.add(new WhitelistDebug());
+
+		chain.add(new ClassMerger(
+			"dan200.computercraft.core.computer.Computer",
+			"org.squiddev.cctweaks.lua.patch.Computer_Patch"
+		));
+
 		BinaryUtils.inject(chain);
 	}
 
