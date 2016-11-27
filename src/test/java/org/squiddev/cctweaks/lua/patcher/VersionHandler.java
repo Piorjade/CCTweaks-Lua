@@ -24,36 +24,82 @@ public class VersionHandler {
 		);
 	}
 
+	public static class Runtime {
+		public final String runtime;
+		public final boolean multiThreading;
+		public final boolean timeoutError;
+
+		public Runtime(String runtime) {
+			this(runtime, false, false);
+		}
+
+		public Runtime(String runtime, boolean multiThreading, boolean timeoutError) {
+			this.runtime = runtime;
+			this.multiThreading = multiThreading;
+			this.timeoutError = timeoutError;
+		}
+
+		public void setup() {
+			System.setProperty("cctweaks.Computer.cobalt", runtime.equals("cobalt") ? "true" : "false");
+			System.setProperty("cctweaks.Computer.rembulan", runtime.equals("rembulan") ? "true" : "false");
+			System.setProperty("cctweaks.Computer.timeoutError", timeoutError ? "true" : "false");
+
+			if (multiThreading) {
+				System.setProperty("cctweaks.Computer.MultiThreading.enabled", "true");
+				System.setProperty("cctweaks.Computer.MultiThreading.threads", "4");
+			} else {
+				System.setProperty("cctweaks.Computer.MultiThreading.enabled", "false");
+			}
+		}
+
+		public void tearDown() {
+			System.clearProperty("cctweaks.Computer.cobalt");
+			System.clearProperty("cctweaks.Computer.rembulan");
+			System.clearProperty("cctweaks.Computer.timeoutError");
+			System.clearProperty("cctweaks.Computer.MultiThreading.enabled");
+			System.clearProperty("cctweaks.Computer.MultiThreading.threads");
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder(runtime);
+			if (multiThreading && timeoutError) {
+				builder.append(" (multi-threading, timeout error)");
+			} else if (multiThreading) {
+				builder.append(" (multi-threading)");
+			} else if (timeoutError) {
+				builder.append(" (timeout error)");
+			}
+
+			return builder.toString();
+		}
+	}
+
+	private static final Runtime[] runtimes = new Runtime[]{
+		new Runtime("luaj", false, false),
+
+		new Runtime("cobalt", false, false),
+		new Runtime("cobalt", false, true),
+		new Runtime("cobalt", true, false),
+		new Runtime("cobalt", true, true),
+
+		new Runtime("rembulan", false, false),
+		new Runtime("rembulan", true, false),
+	};
+
 	public static List<Object[]> getVersionsWithRuntimes() {
 		List<Object[]> versions = getVersions();
-		List<Object[]> withRuntimes = new ArrayList<Object[]>(versions.size() * 3);
+		List<Object[]> withRuntimes = new ArrayList<Object[]>(versions.size() * runtimes.length);
 		for (Object[] version : versions) {
-			{
+			for (Runtime runtime : runtimes) {
 				Object[] with = new Object[version.length + 1];
 				System.arraycopy(version, 0, with, 0, version.length);
-				with[with.length - 1] = "luaj";
+				with[with.length - 1] = runtime;
 				withRuntimes.add(with);
-			}
-			{
-				Object[] without = new Object[version.length + 1];
-				System.arraycopy(version, 0, without, 0, version.length);
-				without[without.length - 1] = "cobalt";
-				withRuntimes.add(without);
-			}
-			{
-				Object[] without = new Object[version.length + 1];
-				System.arraycopy(version, 0, without, 0, version.length);
-				without[without.length - 1] = "rembulan";
-				withRuntimes.add(without);
 			}
 		}
 
 		return withRuntimes;
-	}
-
-	public static void setup(String runtime) {
-		System.setProperty("cctweaks.Computer.cobalt", runtime.equals("cobalt") ? "true" : "false");
-		System.setProperty("cctweaks.Computer.rembulan", runtime.equals("rembulan") ? "true" : "false");
 	}
 
 	public static RewritingLoader getLoader(String version) throws Exception {
@@ -86,19 +132,27 @@ public class VersionHandler {
 	}
 
 	public static void run(ClassLoader loader, String source) throws Throwable {
+		run(loader, source, -1);
+	}
+
+	public static void run(ClassLoader loader, String source, int timeout) throws Throwable {
 		Class<?> runner = loader.loadClass("org.squiddev.cctweaks.lua.patcher.runner.RunOnComputer");
 		try {
-			runner.getMethod("run", String.class).invoke(null, source);
+			runner.getMethod("run", String.class, int.class).invoke(null, source, timeout);
 		} catch (InvocationTargetException e) {
 			throw e.getTargetException();
 		}
 	}
 
 	public static void runFile(ClassLoader loader, String source) throws Throwable {
+		runFile(loader, source, -1);
+	}
+
+	public static void runFile(ClassLoader loader, String source, int timeout) throws Throwable {
 		Class<?> runner = loader.loadClass("org.squiddev.cctweaks.lua.patcher.runner.RunOnComputer");
 		try {
 			Scanner s = new Scanner(loader.getResourceAsStream(("org/squiddev/cctweaks/lua/patcher/" + source + ".lua"))).useDelimiter("\\A");
-			runner.getMethod("run", String.class).invoke(null, s.hasNext() ? s.next() : "");
+			runner.getMethod("run", String.class, int.class).invoke(null, s.hasNext() ? s.next() : "", timeout);
 		} catch (InvocationTargetException e) {
 			throw e.getTargetException();
 		}

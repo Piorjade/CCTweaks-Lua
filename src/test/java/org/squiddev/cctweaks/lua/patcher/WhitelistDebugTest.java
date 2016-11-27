@@ -1,5 +1,6 @@
 package org.squiddev.cctweaks.lua.patcher;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -18,12 +19,17 @@ public class WhitelistDebugTest {
 	public String version;
 
 	@Parameterized.Parameter(1)
-	public String runtime;
+	public VersionHandler.Runtime runtime;
+
+	@After
+	public void tearDown() {
+		runtime.tearDown();
+	}
 
 	@Test
 	public void assertWorks() throws Throwable {
 		System.setProperty("cctweaks.APIs.debug", "true");
-		VersionHandler.setup(runtime);
+		runtime.setup();
 
 		RewritingLoader loader = VersionHandler.getLoader(version);
 		VersionHandler.run(loader, "assert.assert(debug, 'Expected debug API')");

@@ -1,5 +1,6 @@
 package org.squiddev.cctweaks.lua.patcher;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,15 +19,20 @@ public class APITest {
 	public String version;
 
 	@Parameterized.Parameter(1)
-	public String runtime;
+	public VersionHandler.Runtime runtime;
 
 	private ClassLoader loader;
 
 	@Before
 	public void setup() throws Exception {
-		VersionHandler.setup(runtime);
+		runtime.setup();
 		System.setProperty("cctweaks.APIs.bit", "true");
 		loader = VersionHandler.getLoader(version);
+	}
+
+	@After
+	public void tearDown() {
+		runtime.tearDown();
 	}
 
 	@Test

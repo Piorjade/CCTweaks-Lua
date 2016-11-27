@@ -2,17 +2,17 @@ package org.squiddev.cctweaks.lua.patcher.runner;
 
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.computer.ComputerThread;
-import dan200.computercraft.core.computer.ITask;
 import dan200.computercraft.core.computer.MainThread;
 import dan200.computercraft.core.terminal.Terminal;
 import org.junit.Assert;
-import org.squiddev.cctweaks.lua.patcher.utils.Notifier;
+
+import java.lang.reflect.Field;
 
 /**
  * Utilities to run a script on a computer
  */
 public class RunOnComputer {
-	public static void run(String program) throws Throwable {
+	public static void run(String program, int shutdownAfter) throws Throwable {
 		MemoryMount mount = new MemoryMount()
 			.addFile("test", program)
 			.addFile("startup", "assert.assert(pcall(loadfile('test', _ENV or getfenv()) or error)) os.shutdown()");
@@ -27,24 +27,12 @@ public class RunOnComputer {
 		computer.addAPI(api);
 
 		try {
-			final Notifier waiter = new Notifier();
 			computer.turnOn();
 
-			for (int i = 0; i < 60; i++) {
+			for (int i = 0; i < 2000; i++) {
+				long start = System.currentTimeMillis();
+
 				computer.advance(0.05);
-				ComputerThread.queueTask(new ITask() {
-					@Override
-					public Computer getOwner() {
-						return computer;
-					}
-
-					@Override
-					public void execute() {
-						waiter.doNotify();
-					}
-				}, computer);
-
-				waiter.doWait();
 				MainThread.executePendingTasks();
 
 				Throwable exception = api.getException();
@@ -53,9 +41,25 @@ public class RunOnComputer {
 					throw exception;
 				}
 
-				Thread.sleep(1000 / 20);
+				long remaining = (1000 / 20) - (System.currentTimeMillis() - start);
+				if (remaining > 0) Thread.sleep(remaining);
 
-				if (!computer.isOn()) break;
+				// Only break if the computer is *actually* off.
+				Field field = Computer.class.getDeclaredField("m_state");
+				field.setAccessible(true);
+				String status = field.get(computer).toString();
+				if (i > 5 && status.equals("Off")) break;
+
+				// Shutdown the computer after a period of time
+				if (shutdownAfter > 0 && i != 0 && i % shutdownAfter == 0) {
+					computer.shutdown();
+				}
+			}
+
+			Throwable exception = api.getException();
+			if (exception != null) {
+				if (computer.isOn()) computer.shutdown();
+				throw exception;
 			}
 
 			if (computer.isOn()) {
