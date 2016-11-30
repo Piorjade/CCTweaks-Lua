@@ -14,6 +14,9 @@ public class Computer_Patch extends Computer {
 	private ILuaMachine m_machine;
 
 	@MergeVisitor.Stub
+	private boolean m_startRequested;
+
+	@MergeVisitor.Stub
 	public Computer_Patch(IComputerEnvironment environment, Terminal terminal, int id) {
 		super(environment, terminal, id);
 	}
@@ -33,7 +36,7 @@ public class Computer_Patch extends Computer {
 
 	public boolean isMostlyOn() {
 		synchronized (this) {
-			return m_state != State.Off && m_machine != null;
+			return m_startRequested || m_state != State.Off;
 		}
 	}
 
