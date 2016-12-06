@@ -30,6 +30,11 @@ public class Tweaks {
 			"org.squiddev.cctweaks.lua.patch.Computer_Patch"
 		));
 
+		chain.add(new ClassMerger(
+			"dan200.computercraft.core.filesystem.FileSystem",
+			"org.squiddev.cctweaks.lua.patch.FileSystem_Patch"
+		));
+
 		BinaryUtils.inject(chain);
 	}
 
