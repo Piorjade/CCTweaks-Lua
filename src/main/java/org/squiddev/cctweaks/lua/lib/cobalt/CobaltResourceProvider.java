@@ -1,9 +1,8 @@
 package org.squiddev.cctweaks.lua.lib.cobalt;
 
-import dan200.computercraft.api.filesystem.IWritableMount;
 import dan200.computercraft.core.computer.Computer;
-import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.filesystem.FileSystemException;
+import org.squiddev.cctweaks.lua.patch.IPatchedFileSystem;
 import org.squiddev.cobalt.lib.platform.AbstractResourceManipulator;
 import org.squiddev.cobalt.lib.profiler.ProfilerLib;
 
@@ -11,33 +10,24 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Created by JonathanCoates on 06/12/2016.
- */
 public class CobaltResourceProvider extends AbstractResourceManipulator implements ProfilerLib.OutputProvider {
 	private final Computer computer;
-	private FileSystem fileSystem;
-	private IWritableMount rootMount;
+	private IPatchedFileSystem fileSystem;
 
 	public CobaltResourceProvider(Computer computer) {
 		this.computer = computer;
 	}
 
-	private FileSystem getFileSystem() {
+	private IPatchedFileSystem getFileSystem() {
 		if (fileSystem != null) return fileSystem;
-		return fileSystem = computer.getAPIEnvironment().getFileSystem();
-	}
-
-	private IWritableMount getRootMount() {
-		if (rootMount != null) return rootMount;
-		return rootMount = computer.getRootMount();
+		return fileSystem = (IPatchedFileSystem) computer.getAPIEnvironment().getFileSystem();
 	}
 
 	@Override
-	public InputStream findResource(String s) {
+	public InputStream findResource(String path) {
 		try {
-			return getRootMount().openForRead(s);
-		} catch (IOException e) {
+			return getFileSystem().openForReadStream(path);
+		} catch (FileSystemException e) {
 			return null;
 		}
 	}
@@ -61,7 +51,11 @@ public class CobaltResourceProvider extends AbstractResourceManipulator implemen
 	}
 
 	@Override
-	public DataOutputStream createWriter(String name) throws IOException {
-		return new DataOutputStream(getRootMount().openForWrite(name));
+	public DataOutputStream createWriter(String path) throws IOException {
+		try {
+			return new DataOutputStream(getFileSystem().openForWriteStream(path));
+		} catch (FileSystemException e) {
+			throw new IOException(e.getMessage());
+		}
 	}
 }

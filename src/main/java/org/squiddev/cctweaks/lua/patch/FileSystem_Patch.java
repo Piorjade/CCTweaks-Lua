@@ -4,6 +4,8 @@ import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.filesystem.FileSystemException;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -11,16 +13,14 @@ import java.util.regex.Pattern;
 /**
  * Patches FileSystem to improve fs.find performance.
  *
- * @link https://github.com/dan200/ComputerCraft/issues/89
+ * @link https://github.com/dan200/ComputerCraft/issues/89.
+ *
+ * Also implement {@link IPatchedFileSystem} to allow direct access to Input/Output streams.
  */
-public class FileSystem_Patch extends FileSystem {
+public class FileSystem_Patch extends FileSystem implements IPatchedFileSystem {
 	@MergeVisitor.Stub
 	public FileSystem_Patch() throws FileSystemException {
 		super(null, null);
-	}
-
-	@MergeVisitor.Stub
-	private void findIn(String dir, List<String> matches, Pattern wildPattern) throws FileSystemException {
 	}
 
 	public synchronized String[] find(String wildPath) throws FileSystemException {
@@ -48,8 +48,47 @@ public class FileSystem_Patch extends FileSystem {
 		return array;
 	}
 
+	@Override
+	public InputStream openForReadStream(String path) throws FileSystemException {
+		path = sanitizePath(path);
+		MountWrapper mount = this.getMount(path);
+		return mount.openForRead(path);
+	}
+
+	@Override
+	public OutputStream openForWriteStream(String path) throws FileSystemException {
+		path = sanitizePath(path);
+		MountWrapper mount = this.getMount(path);
+		return mount.openForWrite(path);
+	}
+
+	@MergeVisitor.Stub
+	private void findIn(String dir, List<String> matches, Pattern wildPattern) throws FileSystemException {
+	}
+
+	@MergeVisitor.Stub
+	private static String sanitizePath(String path) {
+		return null;
+	}
+
 	@MergeVisitor.Stub
 	private static String sanitizePath(String path, boolean allowWildcards) {
 		return null;
+	}
+
+	@MergeVisitor.Stub
+	private MountWrapper getMount(String path) throws FileSystemException {
+		return null;
+	}
+
+	@MergeVisitor.Stub
+	private static class MountWrapper {
+		public InputStream openForRead(String path) throws FileSystemException {
+			return null;
+		}
+
+		public OutputStream openForWrite(String path) throws FileSystemException {
+			return null;
+		}
 	}
 }
