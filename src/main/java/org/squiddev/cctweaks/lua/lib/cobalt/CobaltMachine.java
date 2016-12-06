@@ -18,7 +18,6 @@ import org.squiddev.cobalt.function.LibFunction;
 import org.squiddev.cobalt.function.LuaFunction;
 import org.squiddev.cobalt.function.VarArgFunction;
 import org.squiddev.cobalt.lib.*;
-import org.squiddev.cobalt.lib.platform.AbstractResourceManipulator;
 import org.squiddev.cobalt.lib.profiler.ProfilerLib;
 
 import java.io.IOException;
@@ -51,12 +50,8 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 	public CobaltMachine(final Computer computer) {
 		super(computer);
 
-		final LuaState state = this.state = new LuaState(new AbstractResourceManipulator() {
-			@Override
-			public InputStream findResource(String s) {
-				throw new IllegalStateException("Cannot open files");
-			}
-		});
+		CobaltResourceProvider resources = new CobaltResourceProvider(computer);
+		final LuaState state = this.state = new LuaState(resources);
 
 		if (Config.Computer.LuaJC.enabled) FallbackLuaJC.install(state);
 
@@ -114,7 +109,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 		LibFunction.bind(state, globals, PrefixLoader.class, new String[]{"load", "loadstring"});
 
 		if (Config.APIs.debug) globals.load(state, new DebugLib());
-		if (Config.APIs.profiler) globals.load(state, new ProfilerLib());
+		if (Config.APIs.profiler) globals.load(state, new ProfilerLib(resources));
 		if (Config.APIs.bigInteger) BigIntegerValue.setup(globals);
 		if (Config.APIs.bitop) BitOpLib.setup(globals);
 
