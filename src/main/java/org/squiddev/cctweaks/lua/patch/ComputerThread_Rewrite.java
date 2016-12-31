@@ -101,7 +101,7 @@ public class ComputerThread_Rewrite {
 	 * @param task     The task to execute
 	 * @param computer The computer to execute it on, use {@code null} to execute on the default object.
 	 */
-	public static void queueTask(ITask task, final Computer computer) {
+	public static void queueTask(ITask task, Computer computer) {
 		Object queueObject = computer == null ? defaultOwner : computer;
 
 		BlockingQueue<ITask> queue = computerTaskQueues.get(queueObject);
@@ -140,52 +140,54 @@ public class ComputerThread_Rewrite {
 		}
 
 		private void execute(BlockingQueue<ITask> queue) {
+			ITask task;
 			try {
-				final ITask task = queue.take();
+				task = queue.take();
+			} catch (InterruptedException ignored) {
+				return;
+			}
 
-				if (thread == null || !thread.isAlive()) {
-					runner = new TaskRunner();
-					thread = delegateFactory.newThread(runner);
-					thread.start();
-				}
+			if (thread == null || !thread.isAlive()) {
+				runner = new TaskRunner();
+				thread = delegateFactory.newThread(runner);
+				thread.start();
+			}
 
-				// Execute the task
-				long start = System.currentTimeMillis();
-				runner.submit(task);
+			// Execute the task
+			long start = System.currentTimeMillis();
+			runner.submit(task);
 
-				try {
-					// If we timed out rather than exiting:
-					boolean done = runner.await(Config.Computer.computerThreadTimeout);
-					if (!done) {
-						// Attempt to soft then hard abort
-						Computer computer = task.getOwner();
-						if (computer != null) {
-							computer.abort(false);
+			try {
+				// If we timed out rather than exiting:
+				boolean done = runner.await(Config.Computer.computerThreadTimeout);
+				if (!done) {
+					// Attempt to soft then hard abort
+					Computer computer = task.getOwner();
+					if (computer != null) {
+						computer.abort(false);
 
-							done = runner.await(1500);
-							if (!done) {
-								computer.abort(true);
-								done = runner.await(1500);
-							}
-						}
-
-						// Interrupt the thread
+						done = runner.await(1500);
 						if (!done) {
-							thread.interrupt();
-							thread = null;
-							runner = null;
+							computer.abort(true);
+							done = runner.await(1500);
 						}
 					}
-				} catch (InterruptedException ignored) {
-				}
 
-				long end = System.currentTimeMillis();
-				Computer owner = task.getOwner();
-				if (owner != null) {
-					ComputerMonitor monitor = ComputerMonitor.get();
-					if (monitor != null) monitor.increment(owner, end - start);
+					// Interrupt the thread
+					if (!done) {
+						thread.interrupt();
+						thread = null;
+						runner = null;
+					}
 				}
 			} catch (InterruptedException ignored) {
+			}
+
+			long end = System.currentTimeMillis();
+			Computer owner = task.getOwner();
+			if (owner != null) {
+				ComputerMonitor monitor = ComputerMonitor.get();
+				if (monitor != null) monitor.increment(owner, end - start);
 			}
 
 			// Re-add it back onto the queue or remove it
