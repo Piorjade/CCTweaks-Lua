@@ -23,9 +23,11 @@ package org.squiddev.cctweaks.lua.lib.socket;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 import org.squiddev.cctweaks.api.lua.ILuaAPI;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.lib.LuaHelpers;
 import org.squiddev.patcher.Logger;
 
 import java.io.IOException;
@@ -35,9 +37,16 @@ import java.util.HashSet;
 
 public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 	protected final HashSet<SocketConnection> connections = new HashSet<SocketConnection>();
+	private final IComputerAccess computer;
+	private int id = 0;
+
+	public SocketAPI(IComputerAccess computer) {
+		this.computer = computer;
+	}
 
 	@Override
 	public void startup() {
+		id = 0;
 	}
 
 	@Override
@@ -87,11 +96,11 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 				}
 
 				try {
-					SocketConnection connection = new SocketConnection(this, checkUri(address, port), port);
+					SocketConnection connection = new SocketConnection(this, computer, id++, checkUri(address, port), port);
 					connections.add(connection);
 					return new Object[]{connection};
 				} catch (IOException e) {
-					throw new LuaException(e.getMessage());
+					throw LuaHelpers.rewriteException(e, "Connection error");
 				}
 			}
 			default:

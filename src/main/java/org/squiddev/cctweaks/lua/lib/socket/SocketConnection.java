@@ -23,6 +23,7 @@ package org.squiddev.cctweaks.lua.lib.socket;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
@@ -47,13 +48,17 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 	private static final ExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads, ThreadBuilder.LOW_PRIORITY);
 
 	private final SocketAPI owner;
+	private final IComputerAccess computer;
+	private final int id;
 
 	private Future<InetAddress> address;
 	private SocketChannel channel;
 	private boolean isResolved = false;
 
-	public SocketConnection(SocketAPI owner, final URI uri, final int port) throws IOException {
+	public SocketConnection(SocketAPI owner, IComputerAccess computer, int id, final URI uri, final int port) throws IOException {
 		this.owner = owner;
+		this.computer = computer;
+		this.id = id;
 
 		channel = SocketChannel.open();
 		channel.configureBlocking(false);
@@ -113,9 +118,17 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 		}
 	}
 
+	public SocketChannel getChannel() {
+		return channel;
+	}
+
+	public void onMessage() {
+		computer.queueEvent("socket_message", new Object[]{id});
+	}
+
 	@Override
 	public String[] getMethodNames() {
-		return new String[]{"checkConnected", "close", "read", "write"};
+		return new String[]{"checkConnected", "close", "read", "write", "id"};
 	}
 
 	private int write(byte[] contents) throws LuaException, InterruptedException {
@@ -139,6 +152,8 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 				int read = channel.read(buffer);
 				if (read == -1) return null;
 
+				// Re-enqueue the listener
+				SocketPoller.get().add(this);
 				return Arrays.copyOf(buffer.array(), read);
 			} catch (IOException e) {
 				throw LuaHelpers.rewriteException(e, "Socket error");
@@ -153,7 +168,12 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 	public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0:
-				return new Object[]{checkConnected()};
+				if (checkConnected()) {
+					SocketPoller.get().add(this);
+					return new Object[]{true};
+				} else {
+					return new Object[]{false};
+				}
 			case 1:
 				try {
 					close(true);
@@ -164,7 +184,11 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 			case 2: {
 				int count = Integer.MAX_VALUE;
 				Object argument = arguments.getArgument(0);
-				if (argument instanceof Number) count = Math.max(0, ((Number) argument).intValue());
+				if (argument instanceof Number) {
+					count = Math.max(0, ((Number) argument).intValue());
+				} else if (argument != null) {
+					throw new LuaException("Expected number");
+				}
 
 				byte[] contents = read(count);
 				return new Object[]{contents};
@@ -173,6 +197,8 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 				int written = write(arguments.getStringBytes(0));
 				return new Object[]{written};
 			}
+			case 4:
+				return new Object[]{id};
 			default:
 				return null;
 		}
@@ -182,7 +208,12 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 	public Object[] callMethod(ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0:
-				return new Object[]{checkConnected()};
+				if (checkConnected()) {
+					SocketPoller.get().add(this);
+					return new Object[]{true};
+				} else {
+					return new Object[]{false};
+				}
 			case 1:
 				try {
 					close(true);
@@ -192,7 +223,7 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 				return null;
 			case 2: {
 				int count = Integer.MAX_VALUE;
-				if (arguments.length >= 1) {
+				if (arguments.length >= 1 && arguments[0] != null) {
 					if (arguments[0] instanceof Number) {
 						count = Math.max(0, ((Number) arguments[0]).intValue());
 					} else {
@@ -219,6 +250,8 @@ public class SocketConnection implements ILuaObjectWithArguments, IMethodDescrip
 				int written = write(stream);
 				return new Object[]{written};
 			}
+			case 4:
+				return new Object[]{id};
 			default:
 				return null;
 		}

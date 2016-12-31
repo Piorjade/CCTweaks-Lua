@@ -13,7 +13,7 @@ public class ApiRegister {
 		environment.registerAPI(new ILuaAPIFactory() {
 			@Override
 			public ILuaAPI create(IComputerAccess computer) {
-				return Config.APIs.Socket.enabled ? new SocketAPI() : null;
+				return Config.APIs.Socket.enabled ? new SocketAPI(computer) : null;
 			}
 
 			@Override
