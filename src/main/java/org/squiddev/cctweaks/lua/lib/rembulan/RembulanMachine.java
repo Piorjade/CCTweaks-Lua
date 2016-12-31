@@ -19,6 +19,7 @@ import net.sandius.rembulan.runtime.*;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.Semaphore;
 import org.squiddev.cctweaks.lua.StreamHelpers;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.AbstractLuaContext;
@@ -335,29 +336,6 @@ public class RembulanMachine implements ILuaMachine {
 					throw ct.resolve(this, invoker);
 				}
 			}
-		}
-	}
-
-	private static final class Semaphore {
-		private volatile boolean state = false;
-
-		public synchronized void signal() {
-			state = true;
-			notify();
-		}
-
-		public synchronized void await() throws InterruptedException {
-			while (!state) wait();
-			state = false;
-		}
-
-		public synchronized boolean await(long timeout) throws InterruptedException {
-			if (!state) {
-				wait(timeout);
-				if (!state) return false;
-			}
-			state = false;
-			return true;
 		}
 	}
 

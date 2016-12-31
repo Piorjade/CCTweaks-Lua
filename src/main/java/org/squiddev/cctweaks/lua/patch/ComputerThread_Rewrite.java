@@ -4,6 +4,7 @@ import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.computer.ComputerThread;
 import dan200.computercraft.core.computer.ITask;
 import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.Semaphore;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.ComputerMonitor;
 import org.squiddev.patcher.Logger;
@@ -11,7 +12,9 @@ import org.squiddev.patcher.Logger;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Rewrite of {@link ComputerThread} supporting multiple threads.
@@ -56,7 +59,7 @@ public class ComputerThread_Rewrite {
 	private static Thread[] threads = null;
 
 	private static final ThreadFactory mainFactory = ThreadBuilder.getFactory("Computer-Tasks", Config.Computer.MultiThreading.priority);
-	private static final ThreadFactory delegateFacotry = ThreadBuilder.getFactory("Computer-Delegate", Config.Computer.MultiThreading.priority);
+	private static final ThreadFactory delegateFactory = ThreadBuilder.getFactory("Computer-Delegate", Config.Computer.MultiThreading.priority);
 
 	/**
 	 * Start the computer thread
@@ -98,7 +101,7 @@ public class ComputerThread_Rewrite {
 	 * @param task     The task to execute
 	 * @param computer The computer to execute it on, use {@code null} to execute on the default object.
 	 */
-	public static void queueTask(ITask task, Computer computer) {
+	public static void queueTask(ITask task, final Computer computer) {
 		Object queueObject = computer == null ? defaultOwner : computer;
 
 		BlockingQueue<ITask> queue = computerTaskQueues.get(queueObject);
@@ -115,7 +118,8 @@ public class ComputerThread_Rewrite {
 	}
 
 	private static final class TaskExecutor implements Runnable {
-		private final ExecutorService executor = Executors.newSingleThreadExecutor(delegateFacotry);
+		private TaskRunner runner;
+		private Thread thread;
 
 		@Override
 		public void run() {
@@ -139,48 +143,40 @@ public class ComputerThread_Rewrite {
 			try {
 				final ITask task = queue.take();
 
-				// Execute the task
-				Future<?> worker = executor.submit(new Runnable() {
-					public void run() {
-						try {
-							task.execute();
-						} catch (Throwable e) {
-							Logger.error("ComputerCraft: Error running task.", e);
-						}
-					}
-				});
+				if (thread == null || !thread.isAlive()) {
+					runner = new TaskRunner();
+					thread = delegateFactory.newThread(runner);
+					thread.start();
+				}
 
 				// Execute the task
 				long start = System.currentTimeMillis();
+				runner.submit(task);
+
 				try {
-					worker.get(Config.Computer.computerThreadTimeout, TimeUnit.MILLISECONDS);
-				} catch (TimeoutException ignored) {
-				}
+					// If we timed out rather than exiting:
+					boolean done = runner.await(Config.Computer.computerThreadTimeout);
+					if (!done) {
+						// Attempt to soft then hard abort
+						Computer computer = task.getOwner();
+						if (computer != null) {
+							computer.abort(false);
 
-				// If we timed out rather than exiting:
-				if (!worker.isDone()) {
-					// Attempt to soft then hard abort
-					Computer computer = task.getOwner();
-					if (computer != null) {
-						computer.abort(false);
-						try {
-							worker.get(1500, TimeUnit.MILLISECONDS);
-						} catch (TimeoutException ignored) {
-						}
-
-						if (!worker.isDone()) {
-							computer.abort(true);
-							try {
-								worker.get(1500, TimeUnit.MILLISECONDS);
-							} catch (TimeoutException ignored) {
+							done = runner.await(1500);
+							if (!done) {
+								computer.abort(true);
+								done = runner.await(1500);
 							}
 						}
-					}
 
-					// Interrupt the thread
-					if (!worker.isDone()) {
-						worker.cancel(true);
+						// Interrupt the thread
+						if (!done) {
+							thread.interrupt();
+							thread = null;
+							runner = null;
+						}
 					}
+				} catch (InterruptedException ignored) {
 				}
 
 				long end = System.currentTimeMillis();
@@ -190,8 +186,6 @@ public class ComputerThread_Rewrite {
 					if (monitor != null) monitor.increment(owner, end - start);
 				}
 			} catch (InterruptedException ignored) {
-			} catch (ExecutionException e) {
-				Logger.error("ComputerCraft: Error running task.", e);
 			}
 
 			// Re-add it back onto the queue or remove it
@@ -202,6 +196,39 @@ public class ComputerThread_Rewrite {
 					computerTasksActive.add(queue);
 				}
 			}
+		}
+	}
+
+	private static final class TaskRunner implements Runnable {
+		private final Semaphore input = new Semaphore();
+		private final Semaphore finished = new Semaphore();
+		private ITask task;
+
+		@Override
+		public void run() {
+			try {
+				while (true) {
+					input.await();
+					try {
+						task.execute();
+					} catch (Throwable e) {
+						Logger.error("ComputerCraft: Error running task.", e);
+					}
+					task = null;
+					finished.signal();
+				}
+			} catch (InterruptedException e) {
+				Logger.error("ComputerCraft: Error running thread.", e);
+			}
+		}
+
+		public void submit(ITask task) {
+			this.task = task;
+			input.signal();
+		}
+
+		public boolean await(long timeout) throws InterruptedException {
+			return finished.await(timeout);
 		}
 	}
 }
