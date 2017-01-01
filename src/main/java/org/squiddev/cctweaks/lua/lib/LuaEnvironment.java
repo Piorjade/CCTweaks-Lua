@@ -1,5 +1,8 @@
 package org.squiddev.cctweaks.lua.lib;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import dan200.computercraft.api.filesystem.IMount;
 import dan200.computercraft.api.filesystem.IWritableMount;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -11,7 +14,10 @@ import dan200.computercraft.core.apis.ILuaAPI;
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.filesystem.FileSystemException;
+import dan200.computercraft.core.lua.ILuaMachine;
 import org.squiddev.cctweaks.api.lua.*;
+import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.patcher.Logger;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,15 +36,22 @@ public class LuaEnvironment implements ILuaEnvironment {
 	 */
 	public static final LuaEnvironment instance = new LuaEnvironment();
 
-	private final Set<ILuaAPIFactory> providers = new HashSet<ILuaAPIFactory>();
+	private final Set<ILuaAPIFactory> apis = Sets.newHashSet();
+	private final Map<String, ILuaMachineFactory<?>> machines = Maps.newHashMap();
 
 	private LuaEnvironment() {
 	}
 
 	@Override
 	public void registerAPI(ILuaAPIFactory factory) {
+		Preconditions.checkNotNull("factory cannot be null");
+		apis.add(factory);
+	}
+
+	@Override
+	public void registerMachine(ILuaMachineFactory<?> factory) {
 		if (factory == null) throw new IllegalArgumentException("factory cannot be null");
-		providers.add(factory);
+		machines.put(factory.getID(), factory);
 	}
 
 	@Override
@@ -86,15 +99,46 @@ public class LuaEnvironment implements ILuaEnvironment {
 	}
 
 	public static void inject(Computer computer) {
-		if (instance.providers.size() == 0) return;
+		if (instance.apis.size() == 0) return;
 
 		IComputerAccess access = new ComputerAccess(computer);
-		for (ILuaAPIFactory factory : instance.providers) {
+		for (ILuaAPIFactory factory : instance.apis) {
 			org.squiddev.cctweaks.api.lua.ILuaAPI api = factory.create(access);
 			if (api != null) {
 				computer.addAPI(new LuaAPI(api, factory));
 			}
 		}
+	}
+
+	/**
+	 * Get the currently selected machine
+	 *
+	 * @return The currently selected VM. May be {@code null} if it doesn't exist.
+	 */
+	public static ILuaMachineFactory<?> getCurrentMachine() {
+		return instance.machines.get(Config.Computer.runtime);
+	}
+
+	/**
+	 * Get the machine which will be used
+	 *
+	 * @return The machine which will be used
+	 */
+	public static ILuaMachineFactory<?> getUsedMachine() {
+		ILuaMachineFactory<?> factory = instance.machines.get(Config.Computer.runtime);
+		if (factory == null) {
+			Logger.warn("Unknown runtime '" + Config.Computer.runtime + "', falling back to luaj");
+			factory = instance.machines.get("luaj");
+
+			if (factory == null) throw new IllegalStateException("Cannot find any runtime");
+		}
+
+		return factory;
+	}
+
+
+	public static ILuaMachine createMachine(Computer computer) {
+		return getUsedMachine().create(computer);
 	}
 
 	private static class LuaAPI implements ILuaAPI, ILuaObjectWithArguments, IExtendedLuaObject, IMethodDescriptor {

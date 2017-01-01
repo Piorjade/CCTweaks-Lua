@@ -21,7 +21,6 @@ public class Tweaks {
 		chain.add(new CustomMachine());
 		addMulti(chain, new CustomThreading());
 		chain.add(new CustomTimeout());
-		chain.add(new InjectLuaJC());
 		chain.add(new LimitLabel());
 		chain.add(new WhitelistDebug());
 

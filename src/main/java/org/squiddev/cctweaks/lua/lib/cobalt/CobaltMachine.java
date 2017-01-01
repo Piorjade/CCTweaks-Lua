@@ -53,8 +53,6 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 		CobaltResourceProvider resources = new CobaltResourceProvider(computer);
 		final LuaState state = this.state = new LuaState(resources);
 
-		if (Config.Computer.LuaJC.enabled) FallbackLuaJC.install(state);
-
 		state.debug = new DebugHandler(state) {
 			private int count = 0;
 			private boolean hasSoftAbort;
@@ -130,6 +128,10 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 
 	public void injectDebug() {
 		globals.load(state, new DebugLib());
+	}
+
+	public LuaState getState() {
+		return state;
 	}
 
 	@Override

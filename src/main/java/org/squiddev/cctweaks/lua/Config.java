@@ -1,7 +1,6 @@
 package org.squiddev.cctweaks.lua;
 
 import org.squiddev.cctweaks.lua.lib.socket.AddressMatcher;
-import org.squiddev.cobalt.luajc.CompileOptions;
 import org.squiddev.configgen.*;
 import org.squiddev.patcher.Logger;
 
@@ -23,21 +22,6 @@ public final class Config {
 			Logger.warn("Cannot find custom bios (" + Computer.biosPath + "), reverting to default");
 			Computer.biosPath = BIOS_PATH;
 		}
-
-		if (Computer.MultiThreading.enabled && Computer.MultiThreading.threads > 1 && !Computer.cobalt && !Computer.rembulan) {
-			Logger.warn("Can only have 1 thread when running on LuaJ, reverting to default");
-			Computer.MultiThreading.threads = 1;
-		}
-
-		if (Computer.luaJC) {
-			Computer.LuaJC.enabled = true;
-			Logger.warn("Computer.luaJC is deprecated: use Computer.LuaJC.enabled instead");
-		}
-
-		if (Computer.luaJCVerify) {
-			Computer.LuaJC.verify = true;
-			Logger.warn("Computer.luaJCVerify is deprecated: use Computer.LuaJC.verify instead");
-		}
 	}
 
 	/**
@@ -54,36 +38,10 @@ public final class Config {
 		public static int computerThreadTimeout;
 
 		/**
-		 * Compile Lua bytecode to Java bytecode.
-		 * Deprecated: Use Computer.LuaJC.enabled instead!
+		 * Specifies the Lua runtime to use for computers.
 		 */
-		@DefaultBoolean(false)
-		@RequiresRestart(mc = false, world = true)
-		@Deprecated
-		public static boolean luaJC;
-
-		/**
-		 * Verify LuaJC sources on generation.
-		 * Deprecated: Use Computer.LuaJC.verify instead!
-		 */
-		@DefaultBoolean(false)
-		@Deprecated
-		public static boolean luaJCVerify;
-
-		/**
-		 * Use the Cobalt Lua engine instead.
-		 * This is a fork of LuaJ with many bugs fixed.
-		 * However other bugs may have appeared, so use with caution.
-		 */
-		@DefaultBoolean(false)
-		public static boolean cobalt;
-
-		/**
-		 * Use the Rembulan Lua 5.1 engine instead.
-		 * This will require a custom BIOS and many programs may not work as expected
-		 */
-		@DefaultBoolean(false)
-		public static boolean rembulan;
+		@DefaultString("luaj")
+		public static String runtime;
 
 		/**
 		 * Error much earlier on a timeout.
@@ -112,38 +70,6 @@ public final class Config {
 		 */
 		@DefaultBoolean(true)
 		public static boolean limitedLabels;
-
-		/**
-		 * Compile Lua bytecode to Java bytecode.
-		 * This speeds up code execution.
-		 */
-		public static class LuaJC {
-			/**
-			 * Compile Lua bytecode to Java bytecode.
-			 * This speeds up code execution.
-			 */
-			@DefaultBoolean(false)
-			@RequiresRestart(mc = false, world = true)
-			public static boolean enabled;
-
-			/**
-			 * Verify sources on generation.
-			 * This will slow down compilation.
-			 * If you have errors, please turn this and debug on and
-			 * send it with the bug report.
-			 */
-			@DefaultBoolean(false)
-			public static boolean verify;
-
-			/**
-			 * Number of calls required before compiling:
-			 * 1 compiles when first called,
-			 * 0 or less compiles when loaded
-			 */
-			@DefaultInt(CompileOptions.THRESHOLD)
-			@Range(min = 0)
-			public static int threshold;
-		}
 
 		/**
 		 * Configuration options to enable running computers across multiple

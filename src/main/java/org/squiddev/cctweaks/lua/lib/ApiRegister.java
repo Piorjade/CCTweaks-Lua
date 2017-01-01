@@ -5,11 +5,17 @@ import org.squiddev.cctweaks.api.lua.ILuaAPI;
 import org.squiddev.cctweaks.api.lua.ILuaAPIFactory;
 import org.squiddev.cctweaks.api.lua.ILuaEnvironment;
 import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.lib.cobalt.CobaltFactory;
+import org.squiddev.cctweaks.lua.lib.luaj.LuaJFactory;
 import org.squiddev.cctweaks.lua.lib.socket.SocketAPI;
 
 public class ApiRegister {
 	public static void init() {
 		ILuaEnvironment environment = LuaEnvironment.instance;
+
+		environment.registerMachine(new LuaJFactory());
+		environment.registerMachine(new CobaltFactory());
+
 		environment.registerAPI(new ILuaAPIFactory() {
 			@Override
 			public ILuaAPI create(IComputerAccess computer) {

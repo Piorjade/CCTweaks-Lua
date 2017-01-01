@@ -3,10 +3,12 @@ package org.squiddev.cctweaks.lua.patch;
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.computer.ComputerThread;
 import dan200.computercraft.core.computer.ITask;
+import org.squiddev.cctweaks.api.lua.ILuaMachineFactory;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.Semaphore;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.ComputerMonitor;
+import org.squiddev.cctweaks.lua.lib.LuaEnvironment;
 import org.squiddev.patcher.Logger;
 
 import java.util.HashSet;
@@ -66,6 +68,12 @@ public class ComputerThread_Rewrite {
 	 */
 	public static void start() {
 		synchronized (stateLock) {
+			ILuaMachineFactory<?> factory = LuaEnvironment.getUsedMachine();
+			if (!factory.supportsMultithreading() && Config.Computer.MultiThreading.threads > 1) {
+				Logger.warn("Can only have 1 thread when running on " + factory.getID() + " runtime, reverting to default");
+				Config.Computer.MultiThreading.threads = 1;
+			}
+
 			stopped = false;
 			if (threads == null) threads = new Thread[Config.Computer.MultiThreading.threads];
 
@@ -110,11 +118,32 @@ public class ComputerThread_Rewrite {
 		}
 
 		synchronized (taskLock) {
-			if (queue.offer(task) && !computerTasksActiveSet.contains(queue)) {
+			if (queue.offer(task) && !computerTasksActiveSet.contains(queue) && !shouldSuspend(computer)) {
 				computerTasksActive.add(queue);
 				computerTasksActiveSet.add(queue);
 			}
 		}
+	}
+
+	/**
+	 * Resume a computer which has been suspended
+	 *
+	 * @param computer The computer to resume
+	 */
+	public static void resumeComputer(Computer computer) {
+		BlockingQueue<ITask> queue = computerTaskQueues.get(computer);
+		if (queue == null) return;
+
+		synchronized (taskLock) {
+			if (!queue.isEmpty() && !computerTasksActiveSet.contains(queue) && !shouldSuspend(computer)) {
+				computerTasksActive.add(queue);
+				computerTasksActiveSet.add(queue);
+			}
+		}
+	}
+
+	private static boolean shouldSuspend(Computer computer) {
+		return computer instanceof IComputerPatched && ((IComputerPatched) computer).suspendEvents();
 	}
 
 	private static final class TaskExecutor implements Runnable {
@@ -192,7 +221,7 @@ public class ComputerThread_Rewrite {
 
 			// Re-add it back onto the queue or remove it
 			synchronized (taskLock) {
-				if (queue.isEmpty()) {
+				if (queue.isEmpty() || shouldSuspend(owner)) {
 					computerTasksActiveSet.remove(queue);
 				} else {
 					computerTasksActive.add(queue);

@@ -3,7 +3,7 @@ package org.squiddev.cctweaks.lua.launch;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.tree.*;
-import org.squiddev.luaj.luajc.utils.AsmUtils;
+import org.squiddev.cctweaks.lua.asm.AsmUtils;
 import org.squiddev.patcher.transformer.IPatcher;
 import org.squiddev.patcher.visitors.FindingVisitor;
 

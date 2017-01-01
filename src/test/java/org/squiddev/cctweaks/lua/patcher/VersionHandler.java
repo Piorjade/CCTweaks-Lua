@@ -40,8 +40,7 @@ public class VersionHandler {
 		}
 
 		public void setup() {
-			System.setProperty("cctweaks.Computer.cobalt", runtime.equals("cobalt") ? "true" : "false");
-			System.setProperty("cctweaks.Computer.rembulan", runtime.equals("rembulan") ? "true" : "false");
+			System.setProperty("cctweaks.Computer.runtime", runtime);
 			System.setProperty("cctweaks.Computer.timeoutError", timeoutError ? "true" : "false");
 
 			if (multiThreading) {
@@ -53,8 +52,7 @@ public class VersionHandler {
 		}
 
 		public void tearDown() {
-			System.clearProperty("cctweaks.Computer.cobalt");
-			System.clearProperty("cctweaks.Computer.rembulan");
+			System.clearProperty("cctweaks.Computer.runtime");
 			System.clearProperty("cctweaks.Computer.timeoutError");
 			System.clearProperty("cctweaks.Computer.MultiThreading.enabled");
 			System.clearProperty("cctweaks.Computer.MultiThreading.threads");
@@ -82,9 +80,6 @@ public class VersionHandler {
 		new Runtime("cobalt", false, true),
 		new Runtime("cobalt", true, false),
 		new Runtime("cobalt", true, true),
-
-		new Runtime("rembulan", false, false),
-		new Runtime("rembulan", true, false),
 	};
 
 	public static List<Object[]> getVersionsWithRuntimes() {
@@ -117,6 +112,9 @@ public class VersionHandler {
 		newLoader.addClassLoaderExclusion("org.hamcrest.");
 		newLoader.loadConfig();
 		newLoader.loadChain();
+		newLoader.loadClass("org.squiddev.cctweaks.lua.lib.ApiRegister")
+			.getMethod("init")
+			.invoke(null);
 		newLoader.chain.finalise();
 		return newLoader;
 	}

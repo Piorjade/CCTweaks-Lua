@@ -12,7 +12,7 @@ import static org.objectweb.asm.Opcodes.*;
 /**
  * Allows adding custom machines
  *
- * @see org.squiddev.cctweaks.lua.lib.LuaHelpers#createMachine(Computer)
+ * @see org.squiddev.cctweaks.lua.lib.LuaEnvironment#createMachine(Computer)
  * @see Computer#initLua()
  */
 public class CustomMachine implements IPatcher {
@@ -33,7 +33,7 @@ public class CustomMachine implements IPatcher {
 			@Override
 			public void handle(InsnList nodes, MethodVisitor visitor) {
 				visitor.visitVarInsn(ALOAD, 0);
-				visitor.visitMethodInsn(INVOKESTATIC, "org/squiddev/cctweaks/lua/lib/LuaHelpers", "createMachine", "(Ldan200/computercraft/core/computer/Computer;)Ldan200/computercraft/core/lua/ILuaMachine;", false);
+				visitor.visitMethodInsn(INVOKESTATIC, "org/squiddev/cctweaks/lua/lib/LuaEnvironment", "createMachine", "(Ldan200/computercraft/core/computer/Computer;)Ldan200/computercraft/core/lua/ILuaMachine;", false);
 			}
 		};
 	}

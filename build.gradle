@@ -27,11 +27,6 @@ repositories {
 		name = "forge"
 		url = "http://files.minecraftforge.net/maven"
 	}
-
-	maven {
-		name = "snapshots"
-		url = "https://oss.sonatype.org/content/repositories/snapshots/"
-	}
 }
 
 configurations {
@@ -45,20 +40,10 @@ dependencies {
 	compile 'com.google.guava:guava:19.0'
 	shade "org.ow2.asm:asm-debug-all:5.0.4"
 
-	shade('org.squiddev:luaj.luajc:1.0.9') {
-		// We provide a custom LuaJ source with ComputerCraft
-		exclude group: 'org.luaj'
-	}
-
 	shade 'org.squiddev:Patcher:1.2.3'
 	shade 'org.squiddev:Cobalt:0.2.1' // Remember to bump this in CobaltMachine too
-	shade 'org.squiddev:cobalt.luajc:1.1.0'
 
 	compile 'org.squiddev:ConfigGen:1.2.5'
-
-	shade('net.sandius.rembulan:rembulan-runtime:0.1-SNAPSHOT') { exclude group: 'org.ow2.asm' }
-	shade('net.sandius.rembulan:rembulan-compiler:0.1-SNAPSHOT') { exclude group: 'org.ow2.asm' }
-	shade('net.sandius.rembulan:rembulan-stdlib:0.1-SNAPSHOT') { exclude group: 'org.ow2.asm' }
 
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 }

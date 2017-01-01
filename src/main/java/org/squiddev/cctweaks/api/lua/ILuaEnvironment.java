@@ -19,6 +19,13 @@ public interface ILuaEnvironment {
 	void registerAPI(ILuaAPIFactory factory);
 
 	/**
+	 * Register a custom machine
+	 *
+	 * @param factory The machine factory to register.
+	 */
+	void registerMachine(ILuaMachineFactory<?> factory);
+
+	/**
 	 * Issue a task to be run on the main thread.
 	 *
 	 * If the task is an instance of {@link IExtendedLuaTask} then the {@link IExtendedLuaTask#update()} method
