@@ -15,9 +15,9 @@ import java.util.regex.Pattern;
  *
  * @link https://github.com/dan200/ComputerCraft/issues/89.
  *
- * Also implement {@link IPatchedFileSystem} to allow direct access to Input/Output streams.
+ * Also implement {@link IFileSystemPatched} to allow direct access to Input/Output streams.
  */
-public class FileSystem_Patch extends FileSystem implements IPatchedFileSystem {
+public class FileSystem_Patch extends FileSystem implements IFileSystemPatched {
 	@MergeVisitor.Stub
 	public FileSystem_Patch() throws FileSystemException {
 		super(null, null);

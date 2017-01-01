@@ -8,7 +8,7 @@ import java.io.OutputStream;
 /**
  * Allows access to FileSystem functions. Some exist already, some are manually patched on.
  */
-public interface IPatchedFileSystem {
+public interface IFileSystemPatched {
 	InputStream openForReadStream(String path) throws FileSystemException;
 
 	OutputStream openForWriteStream(String path) throws FileSystemException;

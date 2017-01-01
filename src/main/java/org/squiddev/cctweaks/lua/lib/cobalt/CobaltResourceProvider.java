@@ -2,7 +2,7 @@ package org.squiddev.cctweaks.lua.lib.cobalt;
 
 import dan200.computercraft.core.computer.Computer;
 import dan200.computercraft.core.filesystem.FileSystemException;
-import org.squiddev.cctweaks.lua.patch.IPatchedFileSystem;
+import org.squiddev.cctweaks.lua.patch.IFileSystemPatched;
 import org.squiddev.cobalt.lib.platform.AbstractResourceManipulator;
 import org.squiddev.cobalt.lib.profiler.ProfilerLib;
 
@@ -12,15 +12,15 @@ import java.io.InputStream;
 
 public class CobaltResourceProvider extends AbstractResourceManipulator implements ProfilerLib.OutputProvider {
 	private final Computer computer;
-	private IPatchedFileSystem fileSystem;
+	private IFileSystemPatched fileSystem;
 
 	public CobaltResourceProvider(Computer computer) {
 		this.computer = computer;
 	}
 
-	private IPatchedFileSystem getFileSystem() {
+	private IFileSystemPatched getFileSystem() {
 		if (fileSystem != null) return fileSystem;
-		return fileSystem = (IPatchedFileSystem) computer.getAPIEnvironment().getFileSystem();
+		return fileSystem = (IFileSystemPatched) computer.getAPIEnvironment().getFileSystem();
 	}
 
 	@Override
