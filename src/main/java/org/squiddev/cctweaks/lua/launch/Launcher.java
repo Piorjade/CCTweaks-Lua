@@ -30,18 +30,18 @@ public class Launcher {
 	}
 
 	public static void execute(ClassLoader classLoader, String className, String[] arguments) throws Exception {
-		classLoader.loadClass("org.squiddev.cctweaks.lua.lib.ApiRegister")
+		Class<?> api = classLoader.loadClass("org.squiddev.cctweaks.lua.lib.ApiRegister");
+		api
 			.getMethod("init")
+			.invoke(null);
+
+		api
+			.getMethod("loadPlugins")
 			.invoke(null);
 
 		classLoader.loadClass(className)
 			.getMethod("main", String[].class)
 			.invoke(null, new Object[]{arguments});
-	}
-
-	public static boolean parseBoolean(String name) {
-		String value = System.getProperty(name);
-		return value != null && Boolean.parseBoolean(value);
 	}
 
 	public static Integer parseNumber(String key) {
