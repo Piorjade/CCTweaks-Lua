@@ -1,4 +1,4 @@
-package org.squiddev.cctweaks.lua.asm.binary;
+package org.squiddev.cctweaks.lua.asm;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;

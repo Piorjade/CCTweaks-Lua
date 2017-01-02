@@ -1,28 +1,24 @@
-package org.squiddev.cctweaks.lua.patch.binfs;
+package org.squiddev.cctweaks.lua.lib.fs;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.core.filesystem.IMountedFile;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.lib.BinaryConverter;
-import org.squiddev.patcher.visitors.MergeVisitor;
+import org.squiddev.cctweaks.lua.patch.iface.MountedNormalFilePatched;
 
 import java.io.IOException;
 
 /**
  * Basic file objects
  */
-@MergeVisitor.Rewrite
-@MergeVisitor.Rename(
-	from = "org/squiddev/cctweaks/lua/patch/binfs/INormalFile",
-	to = "dan200/computercraft/core/filesystem/IMountedFileNormal"
-)
 public class WriterObject implements ILuaObjectWithArguments, IMethodDescriptor {
-	private final INormalFile stream;
+	private final MountedNormalFilePatched stream;
 
-	public WriterObject(INormalFile stream) {
-		this.stream = stream;
+	public WriterObject(IMountedFile stream) {
+		this.stream = (MountedNormalFilePatched) stream;
 	}
 
 	@Override
@@ -40,8 +36,8 @@ public class WriterObject implements ILuaObjectWithArguments, IMethodDescriptor 
 
 		try {
 			stream.write(result, 0, result.length, newLine);
-		} catch (IOException var8) {
-			throw new LuaException(var8.getMessage());
+		} catch (IOException e) {
+			throw new LuaException(e.getMessage());
 		}
 	}
 

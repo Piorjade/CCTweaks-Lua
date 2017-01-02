@@ -13,12 +13,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Patches the HTTP API
+ * Patches the HTTP API with several features:
+ * - HTTP response on failure
+ * - Additional "fetch" method which isn't wrapped in the bios.
  */
-@MergeVisitor.Rename(
-	from = "dan200/computercraft/core/apis/HTTPRequest",
-	to = "org/squiddev/cctweaks/lua/lib/HTTPRequest"
-)
 public class HTTPAPI_Patch extends HTTPAPI {
 	@MergeVisitor.Stub
 	private List<HTTPRequest> m_httpRequests;

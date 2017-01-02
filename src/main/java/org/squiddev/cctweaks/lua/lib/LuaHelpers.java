@@ -20,7 +20,7 @@ public class LuaHelpers {
 	 *
 	 * This exists so I don't have to grow the the stack size.
 	 *
-	 * @see org.squiddev.cctweaks.lua.asm.binary.BinaryMachine#patchWrappedObject(ClassVisitor)
+	 * @see org.squiddev.cctweaks.lua.asm.BinaryMachine#patchWrappedObject(ClassVisitor)
 	 */
 	public static Object[] delegateLuaObject(ILuaObject object, ILuaContext context, int method, Varargs arguments) throws LuaException, InterruptedException {
 		return ArgumentDelegator.delegateLuaObject(object, context, method, new LuaJArguments(arguments));

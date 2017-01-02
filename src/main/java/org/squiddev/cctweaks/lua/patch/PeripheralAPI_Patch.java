@@ -7,7 +7,6 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.core.apis.IAPIEnvironment;
 import dan200.computercraft.core.apis.PeripheralAPI;
 import dan200.computercraft.core.computer.Computer;
-import dan200.computercraft.core.filesystem.FileSystem;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
@@ -15,9 +14,10 @@ import org.squiddev.patcher.visitors.MergeVisitor;
 
 import java.util.Map;
 
+/**
+ * Extends the peripheral API to handle {@link org.squiddev.cctweaks.api.lua.IPeripheralWithArguments} instances.
+ */
 public class PeripheralAPI_Patch extends PeripheralAPI implements ILuaObjectWithArguments {
-	@MergeVisitor.Stub
-	private FileSystem m_fileSystem;
 	@MergeVisitor.Stub
 	private PeripheralWrapper[] m_peripherals;
 

@@ -1,27 +1,23 @@
-package org.squiddev.cctweaks.lua.patch.binfs;
+package org.squiddev.cctweaks.lua.lib.fs;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.core.filesystem.IMountedFile;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
-import org.squiddev.patcher.visitors.MergeVisitor;
+import org.squiddev.cctweaks.lua.patch.iface.MountedNormalFilePatched;
 
 import java.io.IOException;
 
 /**
  * Basic file objects
  */
-@MergeVisitor.Rewrite
-@MergeVisitor.Rename(
-	from = "org/squiddev/cctweaks/lua/patch/binfs/INormalFile",
-	to = "dan200/computercraft/core/filesystem/IMountedFileNormal"
-)
 public class ReaderObject implements ILuaObjectWithArguments, IMethodDescriptor {
-	private final INormalFile stream;
+	private final MountedNormalFilePatched stream;
 
-	public ReaderObject(INormalFile stream) {
-		this.stream = stream;
+	public ReaderObject(IMountedFile stream) {
+		this.stream = (MountedNormalFilePatched) stream;
 	}
 
 	@Override
@@ -34,7 +30,7 @@ public class ReaderObject implements ILuaObjectWithArguments, IMethodDescriptor 
 		switch (method) {
 			case 0:
 				try {
-					byte[] result = stream.readLine();
+					byte[] result = stream.readLineByte();
 					if (result != null) return new Object[]{result};
 					return null;
 				} catch (IOException ignored) {
@@ -42,7 +38,7 @@ public class ReaderObject implements ILuaObjectWithArguments, IMethodDescriptor 
 				return null;
 			case 1:
 				try {
-					byte[] result = stream.readAll();
+					byte[] result = stream.readAllByte();
 					if (result != null) return new Object[]{result};
 					return null;
 				} catch (IOException ignored) {

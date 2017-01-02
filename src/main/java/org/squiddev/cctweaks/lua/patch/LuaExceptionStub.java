@@ -1,4 +1,4 @@
-package org.squiddev.cctweaks.lua.patch.binfs;
+package org.squiddev.cctweaks.lua.patch;
 
 
 public class LuaExceptionStub extends RuntimeException {

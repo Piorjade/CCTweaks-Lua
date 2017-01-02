@@ -9,6 +9,7 @@ import org.squiddev.cctweaks.lua.Semaphore;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.cctweaks.lua.lib.ComputerMonitor;
 import org.squiddev.cctweaks.lua.lib.LuaEnvironment;
+import org.squiddev.cctweaks.lua.patch.iface.ComputerPatched;
 import org.squiddev.patcher.Logger;
 
 import java.util.HashSet;
@@ -143,7 +144,7 @@ public class ComputerThread_Rewrite {
 	}
 
 	private static boolean shouldSuspend(Computer computer) {
-		return computer instanceof IComputerPatched && ((IComputerPatched) computer).suspendEvents();
+		return computer != null && ((ComputerPatched) computer).suspendEvents();
 	}
 
 	private static final class TaskExecutor implements Runnable {
