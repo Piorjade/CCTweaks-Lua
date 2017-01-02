@@ -75,7 +75,7 @@ public interface IArguments {
 	Object[] asArguments();
 
 	/**
-	 * Attempt to get the arguments in binary form, suitable for {@link IBinaryHandler}.
+	 * Attempt to get the arguments in binary form.
 	 *
 	 * @return Array of arguments
 	 */
