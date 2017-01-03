@@ -1,24 +1,3 @@
-/**
- * Copyright (c) 2013-2015 Florian "Sangar" Nücke
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 package org.squiddev.cctweaks.lua.lib.socket;
 
 import dan200.computercraft.api.lua.ILuaContext;
@@ -28,7 +7,6 @@ import org.squiddev.cctweaks.api.lua.ILuaAPI;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.lib.LuaHelpers;
-import org.squiddev.patcher.Logger;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,7 +14,7 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 
 public class SocketAPI implements ILuaAPI, IMethodDescriptor {
-	protected final HashSet<SocketConnection> connections = new HashSet<SocketConnection>();
+	protected final HashSet<AbstractSocketConnection> connections = new HashSet<AbstractSocketConnection>();
 	private final IComputerAccess computer;
 	private int id = 0;
 
@@ -51,12 +29,8 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 
 	@Override
 	public void shutdown() {
-		for (SocketConnection connection : connections) {
-			try {
-				connection.close(false);
-			} catch (IOException e) {
-				Logger.error("Error closing socket", e);
-			}
+		for (AbstractSocketConnection connection : connections) {
+			connection.close(false);
 		}
 
 		connections.clear();
@@ -95,8 +69,10 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 					throw new LuaException("Too many open connections");
 				}
 
+				URI uri = checkUri(address, port);
 				try {
-					SocketConnection connection = new SocketConnection(this, computer, id++, checkUri(address, port), port);
+					AbstractSocketConnection connection = new SocketConnection(this, computer, id++);
+					connection.open(uri, port);
 					connections.add(connection);
 					return new Object[]{connection};
 				} catch (IOException e) {

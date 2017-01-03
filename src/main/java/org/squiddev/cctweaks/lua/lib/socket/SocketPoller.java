@@ -1,5 +1,6 @@
 package org.squiddev.cctweaks.lua.lib.socket;
 
+import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.patcher.Logger;
 
@@ -7,27 +8,43 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.*;
 
 public class SocketPoller implements Runnable {
-	private static SocketPoller poller;
+	private static final ExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads, ThreadBuilder.LOW_PRIORITY);
+	private static final ThreadFactory pollerFactory = ThreadBuilder.getFactory("Socket Poller", ThreadBuilder.LOW_PRIORITY);
 
 	private static final Object lock = new Object();
-	private final ConcurrentLinkedQueue<SocketConnection> channels = new ConcurrentLinkedQueue<SocketConnection>();
-	private Selector selector;
+	private static SocketPoller read;
+	private static SocketPoller connect;
 
-	public SocketPoller() {
+	private final int flag;
+	private final ConcurrentLinkedQueue<SocketAction> channels = new ConcurrentLinkedQueue<SocketAction>();
+	private final Selector selector;
+
+	private static final class SocketAction {
+		final SocketChannel channel;
+		final Runnable runnable;
+
+		private SocketAction(SocketChannel channel, Runnable runnable) {
+			this.channel = channel;
+			this.runnable = runnable;
+		}
+	}
+
+	private SocketPoller(int flag) {
+		this.flag = flag;
+
+		Selector selector = null;
 		try {
 			selector = Selector.open();
 		} catch (IOException e) {
 			Logger.error("Cannot run SocketPoller: sockets will not work as expected", e);
-			return;
 		}
+		this.selector = selector;
+		if (selector == null) return;
 
-		ThreadBuilder
-			.getFactory("Socket Poller", ThreadBuilder.LOW_PRIORITY)
-			.newThread(this)
-			.start();
+		pollerFactory.newThread(this).start();
 	}
 
 	@Override
@@ -36,23 +53,23 @@ public class SocketPoller implements Runnable {
 			try {
 				// Add all new sockets
 				while (true) {
-					SocketConnection connection = channels.poll();
-					if (connection == null) break;
+					SocketAction action = channels.poll();
+					if (action == null) break;
 
-					SocketChannel channel = connection.getChannel();
+					SocketChannel channel = action.channel;
 					if (channel != null && channel.isOpen()) {
-						channel.register(selector, SelectionKey.OP_READ, connection);
+						channel.register(selector, flag, action.runnable);
 					}
 				}
 
-				// Wait for a message
+				// Wait for something
 				selector.select();
 
-				// Queue which ones we've received a message for
+				// Queue which ones we've had a changed state
 				for (SelectionKey key : selector.selectedKeys()) {
-					if (key.isReadable()) {
+					if ((key.readyOps() & flag) != 0) {
 						key.cancel();
-						((SocketConnection) key.attachment()).onMessage();
+						((Runnable) key.attachment()).run();
 					}
 				}
 			} catch (IOException e) {
@@ -61,17 +78,30 @@ public class SocketPoller implements Runnable {
 		}
 	}
 
-	public void add(SocketConnection connection) {
-		channels.offer(connection);
+	public void add(SocketChannel channel, Runnable action) {
+		channels.offer(new SocketAction(channel, action));
 		if (selector != null) selector.wakeup();
 	}
 
-	public static SocketPoller get() {
-		if (poller == null) {
+	public static SocketPoller getRead() {
+		if (read == null) {
 			synchronized (lock) {
-				if (poller == null) poller = new SocketPoller();
+				if (read == null) read = new SocketPoller(SelectionKey.OP_READ);
 			}
 		}
-		return poller;
+		return read;
+	}
+
+	public static SocketPoller getConnect() {
+		if (connect == null) {
+			synchronized (lock) {
+				if (connect == null) connect = new SocketPoller(SelectionKey.OP_CONNECT);
+			}
+		}
+		return connect;
+	}
+
+	public static <T> Future<T> submit(Callable<T> task) {
+		return threads.submit(task);
 	}
 }
