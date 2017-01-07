@@ -34,7 +34,6 @@ configurations {
 	patch
 	provided
 	compile.extendsFrom shade
-	compile.extendsFrom patch
 }
 
 dependencies {
@@ -50,7 +49,7 @@ dependencies {
 		exclude group: 'org.luaj'
 	}
 
-	compile 'org.squiddev:ConfigGen:1.2.5'
+	provided 'org.squiddev:ConfigGen:1.2.5'
 
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 }
@@ -86,6 +85,7 @@ jar {
 	from(configurations.patch.collect { (it.isDirectory() ? it : zipTree(it)) })
 		{
 			include "org/luaj/**"
+			include "org/squiddev/luaj/luajc/IGetPrototype.class"
 		}
 
 	// Package the patch files into a patch/ folder
@@ -101,10 +101,11 @@ task combineJar(type: Jar) {
 	from configurations.shade
 		.collect { it.isDirectory() ? it : zipTree(it) }
 
-	// Package all luaj patches in luaj.luajc
+	// Package all luaj patches in luaj.luajc.
 	from(configurations.patch.collect { (it.isDirectory() ? it : zipTree(it)) })
 		{
 			include "org/luaj/**"
+			include "org/squiddev/luaj/luajc/IGetPrototype.class"
 		}
 
 	// Package the patch files into a patch/ folder
