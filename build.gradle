@@ -6,7 +6,7 @@ apply plugin: 'idea'
 apply plugin: 'maven-publish'
 
 group 'org.squiddev'
-version '1.2.5-pre'
+version '1.3.0'
 
 sourceCompatibility = 1.6
 
@@ -31,8 +31,10 @@ repositories {
 
 configurations {
 	shade
+	patch
 	provided
 	compile.extendsFrom shade
+	compile.extendsFrom patch
 }
 
 dependencies {
@@ -42,6 +44,11 @@ dependencies {
 
 	shade 'org.squiddev:Patcher:1.2.3'
 	shade 'org.squiddev:Cobalt:0.2.1' // Remember to bump this in CobaltMachine too
+
+	patch('org.squiddev:luaj.luajc:1.0.9') {
+		// We provide a custom LuaJ source with ComputerCraft
+		exclude group: 'org.luaj'
+	}
 
 	compile 'org.squiddev:ConfigGen:1.2.5'
 
@@ -75,10 +82,8 @@ task getVersions(type: Task) {
 compileTestJava.dependsOn getVersions
 
 jar {
-	// Package all the org.squiddev dependencies into one file
-	from(configurations.shade
-		.findAll { it.getAbsolutePath().contains("org.squiddev") }
-		.collect { (it.isDirectory() ? it : zipTree(it)) })
+	// Package all luaj patches in luaj.luajc
+	from(configurations.patch.collect { (it.isDirectory() ? it : zipTree(it)) })
 		{
 			include "org/luaj/**"
 		}
@@ -95,6 +100,12 @@ task combineJar(type: Jar) {
 	// Package all the org.squiddev dependencies into one file
 	from configurations.shade
 		.collect { it.isDirectory() ? it : zipTree(it) }
+
+	// Package all luaj patches in luaj.luajc
+	from(configurations.patch.collect { (it.isDirectory() ? it : zipTree(it)) })
+		{
+			include "org/luaj/**"
+		}
 
 	// Package the patch files into a patch/ folder
 	filesMatching("org/luaj/**", {
