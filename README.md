@@ -1,7 +1,7 @@
 # CCTweaks Lua [![Build Status](https://travis-ci.org/SquidDev-CC/CCTweaks-Lua.svg?branch=master)](https://travis-ci.org/SquidDev-CC/CCTweaks-Lua)
 Modifications to ComputerCraft
 
-This is a standalone version of [CCTweaks](https://github.com/SquidDev-CC/CC-Tweaks) that just contains modifications to the LuaVM and surrounding infrastructure.
+This is a standalone version of [CCTweaks](https://github.com/SquidDev-CC/CCTweaks) that just contains modifications to the LuaVM and surrounding infrastructure.
 
 ## Getting started
  - [Download the latest release](https://github.com/SquidDev-CC/CCTweaks-Lua/releases/latest)
@@ -16,12 +16,11 @@ This will inject CCTweaks into the class loader, adding modifications.
  - Fix the binary strings (for fs, http, rednet and os.queueEvent)
  - TCP socket API (`socket`)
  - Compression API (`data`)
- - [LuaJC](https://github.com/SquidDev/luaj.luajc) compiler (compiles Lua code to Java for performance boost)
  - [Cobalt](https://github.com/SquidDev/Cobalt) VM (reentrant fork of LuaJ)
    - Custom termination handler
    - Several bugs fixed (any object error messages, string pattern matching, number format strings)
    - Run multiple computers at once
- - [Rembulan](https://github.com/mjanicek/rembulan) VM (Lua 5.3 for the JVM)
+ - Additional VMs provided by [CCTweaks-Runtimes](https://github.com/SquidDev-CC/CCTweaks-Runtimes)
  - Return HTTP handle on failures
  - Allow getting headers from HTTP responses
  - API for adding custom APIs
