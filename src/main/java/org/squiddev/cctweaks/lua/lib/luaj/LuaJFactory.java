@@ -38,6 +38,11 @@ public class LuaJFactory implements ILuaMachineFactory<LuaJLuaMachine> {
 		return false;
 	}
 
+	@Override
+	public String getPreBios() {
+		return PRE_BIOS_STRING;
+	}
+
 	private static Field getGlobals = null;
 
 	static {

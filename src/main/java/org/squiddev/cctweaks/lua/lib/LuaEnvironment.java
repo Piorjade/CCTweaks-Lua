@@ -136,9 +136,27 @@ public class LuaEnvironment implements ILuaEnvironment {
 		return factory;
 	}
 
-
 	public static ILuaMachine createMachine(Computer computer) {
 		return getUsedMachine().create(computer);
+	}
+
+	/**
+	 * Get the pre-bios path to use
+	 *
+	 * @return The pre-bios path to use
+	 * @see ILuaMachineFactory#getPreBios()
+	 */
+	public static String getPreBios() {
+		ILuaMachineFactory<?> factory = getUsedMachine();
+		String preBios = Config.Computer.preBiosPath;
+		if (preBios != null && !preBios.isEmpty()) return preBios;
+
+		try {
+			preBios = factory.getPreBios();
+		} catch (AbstractMethodError ignored) {
+		}
+
+		return preBios == null ? ILuaMachineFactory.PRE_BIOS_STRING : preBios;
 	}
 
 	private static class LuaAPI implements ILuaAPI, ILuaObjectWithArguments, IExtendedLuaObject, IMethodDescriptor {
@@ -197,13 +215,11 @@ public class LuaEnvironment implements ILuaEnvironment {
 	}
 
 	private static final class ComputerAccess implements IComputerAccess {
-		private final Computer computer;
 		private final IAPIEnvironment environment;
 		private final Set<String> mounts = new HashSet<String>();
 		private FileSystem fs;
 
 		private ComputerAccess(Computer computer) {
-			this.computer = computer;
 			this.environment = computer.getAPIEnvironment();
 		}
 

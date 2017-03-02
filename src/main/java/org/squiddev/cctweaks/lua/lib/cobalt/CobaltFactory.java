@@ -18,4 +18,9 @@ public class CobaltFactory implements ILuaMachineFactory<CobaltMachine> {
 	public boolean supportsMultithreading() {
 		return true;
 	}
+
+	@Override
+	public String getPreBios() {
+		return PRE_BIOS;
+	}
 }

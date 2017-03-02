@@ -16,11 +16,21 @@ public final class Config {
 	@OnSync
 	public static void sync() {
 		if (!Computer.biosPath.startsWith("/")) {
-			Logger.warn("Bios path (" + Computer.biosPath + ") does not start with '/', reverting to default");
+			Logger.warn("bios path (" + Computer.biosPath + ") does not start with '/', reverting to default");
 			Computer.biosPath = BIOS_PATH;
 		} else if (Config.class.getResource(Computer.biosPath) == null) {
 			Logger.warn("Cannot find custom bios (" + Computer.biosPath + "), reverting to default");
 			Computer.biosPath = BIOS_PATH;
+		}
+
+		if (Computer.preBiosPath != null && !Computer.preBiosPath.isEmpty()) {
+			if (!Computer.preBiosPath.startsWith("/")) {
+				Logger.warn("Pre-bios path (" + Computer.preBiosPath + ") does not start with '/', reverting to default");
+				Computer.preBiosPath = "";
+			} else if (Config.class.getResource(Computer.preBiosPath) == null) {
+				Logger.warn("Cannot find custom pre-bios (" + Computer.preBiosPath + "), reverting to default");
+				Computer.preBiosPath = "";
+			}
 		}
 	}
 
@@ -51,12 +61,20 @@ public final class Config {
 		public static boolean timeoutError;
 
 		/**
-		 * Specify a custom bios path to use. You
-		 * must include the initial slash.
+		 * Specify a custom bios path to use.
+		 * You must include the initial slash.
 		 */
 		@RequiresRestart(mc = false, world = true)
 		@DefaultString(BIOS_PATH)
 		public static String biosPath;
+
+		/**
+		 * Specify a custom pre-bios path to use when executing under a custom ROM.
+		 * You must include the initial slash.
+		 */
+		@RequiresRestart(mc = false, world = true)
+		@DefaultString("")
+		public static String preBiosPath;
 
 		/**
 		 * Maximum number of file handles a single computer can have open
