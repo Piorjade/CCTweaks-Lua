@@ -9,8 +9,6 @@ import org.squiddev.patcher.Logger;
  */
 @org.squiddev.configgen.Config(languagePrefix = "gui.config.cctweaks.", propertyPrefix = "cctweaks")
 public final class Config {
-	public static String mcVersion = "1.8.9";
-
 	private static final String BIOS_PATH = "/assets/computercraft/lua/bios.lua";
 
 	@OnSync

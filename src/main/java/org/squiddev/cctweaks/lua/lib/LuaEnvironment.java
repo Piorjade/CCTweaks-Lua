@@ -3,6 +3,7 @@ package org.squiddev.cctweaks.lua.lib;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.api.filesystem.IMount;
 import dan200.computercraft.api.filesystem.IWritableMount;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -139,7 +140,18 @@ public class LuaEnvironment implements ILuaEnvironment {
 	}
 
 	public static ILuaMachine createMachine(Computer computer) {
-		return getUsedMachine().create(computer);
+		ILuaMachineFactory<?> factory = getUsedMachine();
+		IExtendedLuaMachine machine = factory.create(computer);
+
+		machine.setGlobal("_HOST", computer.getAPIEnvironment().getComputerEnvironment().getHostString());
+		machine.setGlobal("_CC_DEFAULT_SETTINGS", ComputerCraft.default_computer_settings);
+		machine.setGlobal("_RUNTIME", factory.getID());
+		if (ComputerCraft.disable_lua51_features) {
+			machine.setGlobal("_CC_DISABLE_LUA51_FEATURES", true);
+		}
+
+
+		return machine;
 	}
 
 	/**

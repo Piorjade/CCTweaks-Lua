@@ -1,12 +1,11 @@
 package org.squiddev.cctweaks.api.lua;
 
 import dan200.computercraft.core.computer.Computer;
-import dan200.computercraft.core.lua.ILuaMachine;
 
 /**
- * Create a {@link dan200.computercraft.core.lua.ILuaMachine} for a computer;
+ * Create a {@link IExtendedLuaMachine} for a computer;
  */
-public interface ILuaMachineFactory<T extends ILuaMachine> {
+public interface ILuaMachineFactory<T extends IExtendedLuaMachine> {
 	/**
 	 * A pre-bios file which protects the string metatable from being accessed or mutated.
 	 */

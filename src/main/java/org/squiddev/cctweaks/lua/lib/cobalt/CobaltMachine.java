@@ -1,12 +1,11 @@
 package org.squiddev.cctweaks.lua.lib.cobalt;
 
-import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.api.lua.ILuaObject;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.core.apis.ILuaAPI;
 import dan200.computercraft.core.computer.Computer;
-import dan200.computercraft.core.lua.ILuaMachine;
 import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
+import org.squiddev.cctweaks.api.lua.IExtendedLuaMachine;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.lib.AbstractLuaContext;
 import org.squiddev.cobalt.*;
@@ -28,7 +27,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.ILLEGAL_NAMES;
-import static org.squiddev.cctweaks.lua.lib.LuaMachineHelpers.getHost;
 import static org.squiddev.cobalt.Constants.NIL;
 import static org.squiddev.cobalt.Constants.NONE;
 import static org.squiddev.cobalt.ValueFactory.valueOf;
@@ -39,7 +37,7 @@ import static org.squiddev.cobalt.ValueFactory.varargsOf;
  *
  * @see dan200.computercraft.core.lua.LuaJLuaMachine
  */
-public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
+public class CobaltMachine extends AbstractLuaContext implements IExtendedLuaMachine {
 	private final LuaState state;
 	private final LuaTable globals;
 	private LuaThread mainThread;
@@ -115,24 +113,16 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 		for (String global : ILLEGAL_NAMES) {
 			globals.rawset(global, Constants.NIL);
 		}
-
-		String host = getHost(computer);
-		if (host != null) globals.rawset("_HOST", valueOf(host));
-
-		globals.rawset("_CC_VERSION", valueOf(ComputerCraft.getVersion()));
-		globals.rawset("_MC_VERSION", valueOf(Config.mcVersion));
-		globals.rawset("_LUAJ_VERSION", valueOf("Cobalt 0.2.3"));
-		if (ComputerCraft.disable_lua51_features) {
-			globals.rawset("_CC_DISABLE_LUA51_FEATURES", Constants.TRUE);
-		}
 	}
 
-	public void injectDebug() {
+	@Override
+	public void setGlobal(String name, Object object) {
+		globals.rawset(name, toValue(object, null));
+	}
+
+	@Override
+	public void enableDebug() {
 		globals.load(state, new DebugLib());
-	}
-
-	public LuaState getState() {
-		return state;
 	}
 
 	@Override
