@@ -8,6 +8,8 @@ import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
+import javax.annotation.Nonnull;
+
 /**
  * Allows queueing events with binary data.
  */
@@ -18,7 +20,7 @@ public class OSAPI_Patch extends OSAPI implements ILuaObjectWithArguments {
 	}
 
 	@Override
-	public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+	public Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0:
 				queueLuaEvent(arguments.getString(0), arguments.subArgs(1).asBinary());

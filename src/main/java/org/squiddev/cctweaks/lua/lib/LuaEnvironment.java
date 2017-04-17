@@ -21,6 +21,7 @@ import org.squiddev.cctweaks.api.lua.*;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.patcher.Logger;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
@@ -46,19 +47,19 @@ public class LuaEnvironment implements ILuaEnvironment {
 	}
 
 	@Override
-	public void registerAPI(ILuaAPIFactory factory) {
+	public void registerAPI(@Nonnull ILuaAPIFactory factory) {
 		Preconditions.checkNotNull("factory cannot be null");
 		apis.add(factory);
 	}
 
 	@Override
-	public void registerMachine(ILuaMachineFactory<?> factory) {
+	public void registerMachine(@Nonnull ILuaMachineFactory<?> factory) {
 		if (factory == null) throw new IllegalArgumentException("factory cannot be null");
 		machines.put(factory.getID(), factory);
 	}
 
 	@Override
-	public long issueTask(IComputerAccess access, ILuaTask task, int delay) throws LuaException {
+	public long issueTask(@Nonnull IComputerAccess access, @Nonnull ILuaTask task, int delay) throws LuaException {
 		long id = DelayedTasks.getNextId();
 		if (!DelayedTasks.addTask(access, task, delay, id)) throw new LuaException("Too many tasks");
 
@@ -66,7 +67,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 	}
 
 	@Override
-	public Object[] executeTask(IComputerAccess access, ILuaContext context, ILuaTask task, int delay) throws LuaException, InterruptedException {
+	public Object[] executeTask(@Nonnull IComputerAccess access, @Nonnull ILuaContext context, @Nonnull ILuaTask task, int delay) throws LuaException, InterruptedException {
 		long id = issueTask(access, task, delay);
 
 		Object[] response;
@@ -97,7 +98,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 	}
 
 	@Override
-	public void sleep(IComputerAccess access, ILuaContext context, int delay) throws LuaException, InterruptedException {
+	public void sleep(@Nonnull IComputerAccess access, @Nonnull ILuaContext context, int delay) throws LuaException, InterruptedException {
 		executeTask(access, context, sleepTask, delay);
 	}
 
@@ -165,12 +166,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 		String preBios = Config.Computer.preBiosPath;
 		if (preBios != null && !preBios.isEmpty()) return preBios;
 
-		try {
-			preBios = factory.getPreBios();
-		} catch (AbstractMethodError ignored) {
-		}
-
-		return preBios == null ? ILuaMachineFactory.PRE_BIOS_STRING : preBios;
+		return factory.getPreBios();
 	}
 
 	private static class LuaAPI implements ILuaAPI, ILuaObjectWithArguments, IExtendedLuaObject, IMethodDescriptor {
@@ -213,7 +209,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 		}
 
 		@Override
-		public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+		public Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 			return ArgumentDelegator.delegateLuaObject(api, context, method, arguments);
 		}
 
@@ -336,6 +332,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 			}
 		}
 
+		@Nonnull
 		@Override
 		public IWritableMount getRootMount() {
 			return computer.getRootMount();

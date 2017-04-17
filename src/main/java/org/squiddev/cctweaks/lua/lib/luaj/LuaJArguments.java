@@ -6,6 +6,8 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import org.squiddev.cctweaks.api.lua.IArguments;
 
+import javax.annotation.Nonnull;
+
 public class LuaJArguments implements IArguments {
 	private final Varargs args;
 
@@ -81,6 +83,7 @@ public class LuaJArguments implements IArguments {
 		return LuaJConverter.toObjects(args, 1, true);
 	}
 
+	@Nonnull
 	@Override
 	public IArguments subArgs(int offset) {
 		return new LuaJArguments(args.subargs(offset + 1));

@@ -2,6 +2,8 @@ package org.squiddev.cctweaks.api.lua;
 
 import dan200.computercraft.core.computer.Computer;
 
+import javax.annotation.Nonnull;
+
 /**
  * Create a {@link IExtendedLuaMachine} for a computer;
  */
@@ -22,6 +24,7 @@ public interface ILuaMachineFactory<T extends IExtendedLuaMachine> {
 	 *
 	 * @return The ID of this machine
 	 */
+	@Nonnull
 	String getID();
 
 	/**
@@ -30,6 +33,7 @@ public interface ILuaMachineFactory<T extends IExtendedLuaMachine> {
 	 * @param computer The computer to create this for
 	 * @return The created machine.
 	 */
+	@Nonnull
 	T create(Computer computer);
 
 	/**
@@ -47,7 +51,8 @@ public interface ILuaMachineFactory<T extends IExtendedLuaMachine> {
 	 *
 	 * See {@link #PRE_BIOS} and {@link #PRE_BIOS_STRING}.
 	 *
-	 * @return The pre-bios path. Use {@code null} to return the default.
+	 * @return The pre-bios path.
 	 */
+	@Nonnull
 	String getPreBios();
 }

@@ -1,5 +1,7 @@
 package org.squiddev.cctweaks.api.lua;
 
+import javax.annotation.Nonnull;
+
 /**
  * The base interface for all CCTweaks-Lua plugins.
  *
@@ -14,5 +16,5 @@ public abstract class CCTweaksPlugin {
 	 *
 	 * @param environment The environment to register it in.
 	 */
-	public abstract void register(ILuaEnvironment environment);
+	public abstract void register(@Nonnull ILuaEnvironment environment);
 }

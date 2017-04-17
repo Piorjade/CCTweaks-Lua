@@ -6,6 +6,8 @@ import org.squiddev.cobalt.LuaString;
 import org.squiddev.cobalt.LuaValue;
 import org.squiddev.cobalt.Varargs;
 
+import javax.annotation.Nonnull;
+
 public class CobaltArguments implements IArguments {
 	private final Varargs args;
 
@@ -85,6 +87,7 @@ public class CobaltArguments implements IArguments {
 		return CobaltConverter.toObjects(args, 1, true);
 	}
 
+	@Nonnull
 	@Override
 	public IArguments subArgs(int offset) {
 		return new CobaltArguments(args.subargs(offset + 1));

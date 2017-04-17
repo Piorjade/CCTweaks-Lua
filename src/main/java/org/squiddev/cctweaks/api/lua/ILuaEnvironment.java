@@ -5,6 +5,9 @@ import dan200.computercraft.api.lua.ILuaTask;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Various hooks and methods for interfacing with the Lua environment
  */
@@ -16,14 +19,14 @@ public interface ILuaEnvironment {
 	 *
 	 * @param factory The API factory to register
 	 */
-	void registerAPI(ILuaAPIFactory factory);
+	void registerAPI(@Nonnull ILuaAPIFactory factory);
 
 	/**
 	 * Register a custom machine
 	 *
 	 * @param factory The machine factory to register.
 	 */
-	void registerMachine(ILuaMachineFactory<?> factory);
+	void registerMachine(@Nonnull ILuaMachineFactory<?> factory);
 
 	/**
 	 * Issue a task to be run on the main thread.
@@ -40,7 +43,7 @@ public interface ILuaEnvironment {
 	 * @return The task ID. You can pull an event with name {@link #EVENT_NAME} to wait for this task.
 	 * @throws LuaException When there are too many tasks (>50000).
 	 */
-	long issueTask(IComputerAccess access, ILuaTask task, int delay) throws LuaException;
+	long issueTask(@Nonnull IComputerAccess access, @Nonnull ILuaTask task, int delay) throws LuaException;
 
 	/**
 	 * Issue a task to be run on the main thread and wait for its completion
@@ -59,7 +62,8 @@ public interface ILuaEnvironment {
 	 * @throws LuaException         When there are too many tasks (>50000) on when terminated
 	 * @throws InterruptedException When terminated
 	 */
-	Object[] executeTask(IComputerAccess access, ILuaContext context, ILuaTask task, int delay) throws LuaException, InterruptedException;
+	@Nullable
+	Object[] executeTask(@Nonnull IComputerAccess access, @Nonnull ILuaContext context, @Nonnull ILuaTask task, int delay) throws LuaException, InterruptedException;
 
 	/**
 	 * Sleep the Lua thread for a duration
@@ -70,5 +74,5 @@ public interface ILuaEnvironment {
 	 * @throws LuaException         When there are too many tasks (>50000) on when terminated
 	 * @throws InterruptedException When terminated
 	 */
-	void sleep(IComputerAccess access, ILuaContext context, int delay) throws LuaException, InterruptedException;
+	void sleep(@Nonnull IComputerAccess access, @Nonnull ILuaContext context, int delay) throws LuaException, InterruptedException;
 }

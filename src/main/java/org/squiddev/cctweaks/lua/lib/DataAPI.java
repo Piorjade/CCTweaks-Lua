@@ -5,6 +5,7 @@ import dan200.computercraft.api.lua.LuaException;
 import org.squiddev.cctweaks.api.lua.*;
 import org.squiddev.cctweaks.lua.Config;
 
+import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.Deflater;
@@ -34,10 +35,11 @@ public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory
 	}
 
 	@Override
-	public ILuaAPI create(IExtendedComputerAccess computer) {
+	public ILuaAPI create(@Nonnull IExtendedComputerAccess computer) {
 		return Config.APIs.Data.enabled ? this : null;
 	}
 
+	@Nonnull
 	@Override
 	public String[] getNames() {
 		return new String[]{"data"};
@@ -64,7 +66,7 @@ public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory
 	}
 
 	@Override
-	public Object[] callMethod(ILuaContext context, int method, IArguments args) throws LuaException, InterruptedException {
+	public Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments args) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0:
 				return inflate(args.getStringBytes(0));

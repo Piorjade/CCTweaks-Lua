@@ -4,6 +4,9 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.ILuaObject;
 import dan200.computercraft.api.lua.LuaException;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * A {@link ILuaObject} that supports being called with {@link IArguments}.
  *
@@ -24,5 +27,6 @@ public interface ILuaObjectWithArguments extends ILuaObject {
 	 * @throws InterruptedException If the computer is terminated.
 	 * @see #callMethod(ILuaContext, int, Object[])
 	 */
-	Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException;
+	@Nullable
+	Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException;
 }

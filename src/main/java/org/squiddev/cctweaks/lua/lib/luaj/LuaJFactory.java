@@ -10,15 +10,19 @@ import org.squiddev.cctweaks.api.lua.ILuaMachineFactory;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.patcher.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 public class LuaJFactory implements ILuaMachineFactory<LuaJFactory.LuaJMachine> {
+	@Nonnull
 	@Override
 	public String getID() {
 		return "luaj";
 	}
 
+	@Nonnull
 	@Override
 	public LuaJMachine create(Computer computer) {
 		LuaJMachine machine = new LuaJMachine(computer);
@@ -37,6 +41,7 @@ public class LuaJFactory implements ILuaMachineFactory<LuaJFactory.LuaJMachine> 
 		return false;
 	}
 
+	@Nonnull
 	@Override
 	public String getPreBios() {
 		return PRE_BIOS_STRING;
@@ -76,7 +81,7 @@ public class LuaJFactory implements ILuaMachineFactory<LuaJFactory.LuaJMachine> 
 		}
 
 		@Override
-		public void setGlobal(String name, Object object) {
+		public void setGlobal(@Nonnull String name, @Nullable Object object) {
 			LuaTable globals = getGlobals();
 			if (globals != null) {
 				LuaValue converted;

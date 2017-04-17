@@ -2,6 +2,7 @@ package org.squiddev.cctweaks.api.lua;
 
 import dan200.computercraft.api.lua.ILuaObject;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 /**
@@ -13,5 +14,6 @@ public interface IExtendedLuaObject extends ILuaObject {
 	 *
 	 * @return Additional fields. Do not return {@code null}
 	 */
+	@Nonnull
 	Map<Object, Object> getAdditionalData();
 }

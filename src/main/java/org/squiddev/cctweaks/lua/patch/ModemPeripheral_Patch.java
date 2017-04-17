@@ -7,12 +7,14 @@ import dan200.computercraft.shared.peripheral.modem.ModemPeripheral;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.IPeripheralWithArguments;
 
+import javax.annotation.Nonnull;
+
 /**
  * Allows transmitting binary data. No casts are done so we can just delegate directly.
  */
 public abstract class ModemPeripheral_Patch extends ModemPeripheral implements IPeripheralWithArguments {
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+	public Object[] callMethod(@Nonnull IComputerAccess computer, @Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 		return callMethod(computer, context, method, arguments.asBinary());
 	}
 }

@@ -3,6 +3,8 @@ package org.squiddev.cctweaks.api.lua;
 import dan200.computercraft.api.filesystem.IWritableMount;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 
 /**
@@ -19,6 +21,7 @@ public interface IExtendedComputerAccess extends IComputerAccess {
 	 *
 	 * @return The computer's path, or {@code null} if it cannot be determined.
 	 */
+	@Nullable
 	File getRootMountPath();
 
 	/**
@@ -26,5 +29,6 @@ public interface IExtendedComputerAccess extends IComputerAccess {
 	 *
 	 * @return The computer's mount.
 	 */
+	@Nonnull
 	IWritableMount getRootMount();
 }

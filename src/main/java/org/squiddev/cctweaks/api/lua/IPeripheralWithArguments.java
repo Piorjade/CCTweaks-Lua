@@ -5,6 +5,9 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * A peripheral interface with support for being called with {@link IArguments}
  *
@@ -27,5 +30,6 @@ public interface IPeripheralWithArguments extends IPeripheral {
 	 * @throws InterruptedException If the computer is terminated.
 	 * @see #callMethod(IComputerAccess, ILuaContext, int, Object[])
 	 */
-	Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException;
+	@Nullable
+	Object[] callMethod(@Nonnull IComputerAccess computer, @Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException;
 }

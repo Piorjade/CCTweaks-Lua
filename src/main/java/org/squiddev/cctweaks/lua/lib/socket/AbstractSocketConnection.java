@@ -11,6 +11,7 @@ import org.squiddev.cctweaks.lua.lib.BinaryConverter;
 import org.squiddev.cctweaks.lua.lib.LuaHelpers;
 import org.squiddev.patcher.Logger;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -130,7 +131,7 @@ public abstract class AbstractSocketConnection implements ILuaObjectWithArgument
 	}
 
 	@Override
-	public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+	public Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0:
 				return new Object[]{checkConnected()};

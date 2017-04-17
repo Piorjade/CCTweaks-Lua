@@ -6,6 +6,7 @@ import org.squiddev.cctweaks.lua.lib.cobalt.CobaltFactory;
 import org.squiddev.cctweaks.lua.lib.luaj.LuaJFactory;
 import org.squiddev.cctweaks.lua.lib.socket.SocketAPI;
 
+import javax.annotation.Nonnull;
 import java.util.ServiceLoader;
 
 public class ApiRegister {
@@ -17,10 +18,11 @@ public class ApiRegister {
 
 		environment.registerAPI(new ILuaAPIFactory() {
 			@Override
-			public ILuaAPI create(IExtendedComputerAccess computer) {
+			public ILuaAPI create(@Nonnull IExtendedComputerAccess computer) {
 				return Config.APIs.Socket.enabled ? new SocketAPI(computer) : null;
 			}
 
+			@Nonnull
 			@Override
 			public String[] getNames() {
 				return new String[]{"socket"};

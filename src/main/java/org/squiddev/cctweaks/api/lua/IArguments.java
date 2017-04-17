@@ -2,6 +2,9 @@ package org.squiddev.cctweaks.api.lua;
 
 import dan200.computercraft.api.lua.LuaException;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Custom wrapper for arguments, allowing more advanced handling
  */
@@ -40,6 +43,7 @@ public interface IArguments {
 	 * @return The string that was read
 	 * @throws LuaException In the form {@code "Expected string"}, when the argument is not a string.
 	 */
+	@Nonnull
 	String getString(int index) throws LuaException;
 
 	/**
@@ -57,6 +61,7 @@ public interface IArguments {
 	 * @param index The argument index
 	 * @return The argument or {@code null} if not set
 	 */
+	@Nullable
 	Object getArgumentBinary(int index);
 
 	/**
@@ -65,6 +70,7 @@ public interface IArguments {
 	 * @param index The argument index
 	 * @return The argument or {@code null} if not set
 	 */
+	@Nullable
 	Object getArgument(int index);
 
 	/**
@@ -72,6 +78,7 @@ public interface IArguments {
 	 *
 	 * @return Array of arguments
 	 */
+	@Nonnull
 	Object[] asArguments();
 
 	/**
@@ -79,6 +86,7 @@ public interface IArguments {
 	 *
 	 * @return Array of arguments
 	 */
+	@Nonnull
 	Object[] asBinary();
 
 	/**
@@ -87,5 +95,6 @@ public interface IArguments {
 	 * @param offset The offset to start from, 0 would be identical to the current instance
 	 * @return The subargs
 	 */
+	@Nonnull
 	IArguments subArgs(int offset);
 }

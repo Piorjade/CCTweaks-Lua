@@ -10,6 +10,8 @@ import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.patcher.Logger;
 
+import javax.annotation.Nonnull;
+
 /**
  * Adds various assertions to Lua
  */
@@ -100,7 +102,7 @@ public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments, IMethodDe
 	}
 
 	@Override
-	public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+	public Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 		return callMethod(context, method, arguments.asBinary());
 	}
 

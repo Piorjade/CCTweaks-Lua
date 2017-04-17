@@ -12,6 +12,7 @@ import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
 import org.squiddev.patcher.visitors.MergeVisitor;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 /**
@@ -35,7 +36,7 @@ public class PeripheralAPI_Patch extends PeripheralAPI implements ILuaObjectWith
 	}
 
 	@Override
-	public Object[] callMethod(ILuaContext context, int method, IArguments args) throws LuaException, InterruptedException {
+	public Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments args) throws LuaException, InterruptedException {
 		if (method == 3) {
 			if (args.size() >= 2 && args.getArgument(1) != null && args.getArgument(1) instanceof String) {
 				String methodName = args.getString(1);

@@ -37,6 +37,8 @@ configurations {
 }
 
 dependencies {
+	provided "com.google.code.findbugs:jsr305:3.0.2"
+
 	provided "ComputerCraft:ComputerCraft:1.79"
 	compile 'com.google.guava:guava:19.0'
 	shade "org.ow2.asm:asm-debug-all:5.0.4"

@@ -20,6 +20,8 @@ import org.squiddev.cobalt.function.VarArgFunction;
 import org.squiddev.cobalt.lib.*;
 import org.squiddev.cobalt.lib.profiler.ProfilerLib;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -116,7 +118,7 @@ public class CobaltMachine extends AbstractLuaContext implements IExtendedLuaMac
 	}
 
 	@Override
-	public void setGlobal(String name, Object object) {
+	public void setGlobal(@Nonnull String name, @Nullable Object object) {
 		globals.rawset(name, toValue(object, null));
 	}
 

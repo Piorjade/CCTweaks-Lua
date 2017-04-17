@@ -6,6 +6,9 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /**
  * Used to delegate arguments
  */
@@ -27,7 +30,8 @@ public final class ArgumentDelegator {
 	 * @see ILuaObject#callMethod(ILuaContext, int, Object[])
 	 * @see ILuaObjectWithArguments#callMethod(ILuaContext, int, IArguments)
 	 */
-	public static Object[] delegateLuaObject(ILuaObject object, ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+	@Nullable
+	public static Object[] delegateLuaObject(@Nonnull ILuaObject object, @Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 		if (object instanceof ILuaObjectWithArguments) {
 			return ((ILuaObjectWithArguments) object).callMethod(context, method, arguments);
 		} else {
@@ -49,7 +53,8 @@ public final class ArgumentDelegator {
 	 * @see IPeripheral#callMethod(IComputerAccess, ILuaContext, int, Object[])
 	 * @see IPeripheralWithArguments#callMethod(IComputerAccess, ILuaContext, int, IArguments)
 	 */
-	public static Object[] delegatePeripheral(IPeripheral peripheral, IComputerAccess computer, ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+	@Nullable
+	public static Object[] delegatePeripheral(@Nonnull IPeripheral peripheral, @Nonnull IComputerAccess computer, @Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 		if (peripheral instanceof IPeripheralWithArguments) {
 			return ((IPeripheralWithArguments) peripheral).callMethod(computer, context, method, arguments);
 		} else {

@@ -9,6 +9,7 @@ import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
 import org.squiddev.cctweaks.lua.lib.BinaryConverter;
 import org.squiddev.cctweaks.lua.patch.iface.MountedNormalFilePatched;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 /**
@@ -71,7 +72,7 @@ public class WriterObject implements ILuaObjectWithArguments, IMethodDescriptor 
 	}
 
 	@Override
-	public Object[] callMethod(ILuaContext context, int method, IArguments arguments) throws LuaException, InterruptedException {
+	public Object[] callMethod(@Nonnull ILuaContext context, int method, @Nonnull IArguments arguments) throws LuaException, InterruptedException {
 		return callMethod(context, method, arguments.asBinary());
 	}
 
