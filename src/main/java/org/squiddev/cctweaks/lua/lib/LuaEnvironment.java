@@ -12,6 +12,7 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.core.apis.IAPIEnvironment;
 import dan200.computercraft.core.apis.ILuaAPI;
 import dan200.computercraft.core.computer.Computer;
+import dan200.computercraft.core.filesystem.FileMount;
 import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.filesystem.FileSystemException;
 import dan200.computercraft.core.lua.ILuaMachine;
@@ -19,6 +20,7 @@ import org.squiddev.cctweaks.api.lua.*;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.patcher.Logger;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -101,7 +103,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 	public static void inject(Computer computer) {
 		if (instance.apis.size() == 0) return;
 
-		IComputerAccess access = new ComputerAccess(computer);
+		IExtendedComputerAccess access = new ComputerAccess(computer);
 		for (ILuaAPIFactory factory : instance.apis) {
 			org.squiddev.cctweaks.api.lua.ILuaAPI api = factory.create(access);
 			if (api != null) {
@@ -214,12 +216,14 @@ public class LuaEnvironment implements ILuaEnvironment {
 		}
 	}
 
-	private static final class ComputerAccess implements IComputerAccess {
+	private static final class ComputerAccess implements IExtendedComputerAccess {
 		private final IAPIEnvironment environment;
+		private final Computer computer;
 		private final Set<String> mounts = new HashSet<String>();
 		private FileSystem fs;
 
 		private ComputerAccess(Computer computer) {
+			this.computer = computer;
 			this.environment = computer.getAPIEnvironment();
 		}
 
@@ -241,7 +245,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 
 		@Override
 		public String mount(String desiredLoc, IMount mount) {
-			return this.mount(desiredLoc, mount, desiredLoc);
+			return mount(desiredLoc, mount, desiredLoc);
 		}
 
 		@Override
@@ -308,6 +312,21 @@ public class LuaEnvironment implements ILuaEnvironment {
 		@Override
 		public String getAttachmentName() {
 			return environment.getLabel();
+		}
+
+		@Override
+		public File getRootMountPath() {
+			IWritableMount mount = computer.getRootMount();
+			if (mount instanceof FileMount) {
+				return ((FileMount) mount).getRealPath("");
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public IWritableMount getRootMount() {
+			return computer.getRootMount();
 		}
 	}
 }

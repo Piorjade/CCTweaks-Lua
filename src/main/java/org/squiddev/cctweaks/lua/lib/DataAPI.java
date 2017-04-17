@@ -2,7 +2,6 @@ package org.squiddev.cctweaks.lua.lib;
 
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
 import org.squiddev.cctweaks.api.lua.*;
 import org.squiddev.cctweaks.lua.Config;
 
@@ -19,12 +18,10 @@ import java.util.zip.InflaterOutputStream;
 public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory, IMethodDescriptor {
 	@Override
 	public void startup() {
-
 	}
 
 	@Override
 	public void shutdown() {
-
 	}
 
 	@Override
@@ -37,7 +34,7 @@ public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory
 	}
 
 	@Override
-	public ILuaAPI create(IComputerAccess computer) {
+	public ILuaAPI create(IExtendedComputerAccess computer) {
 		return Config.APIs.Data.enabled ? this : null;
 	}
 

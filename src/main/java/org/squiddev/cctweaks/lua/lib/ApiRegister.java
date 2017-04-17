@@ -1,10 +1,6 @@
 package org.squiddev.cctweaks.lua.lib;
 
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import org.squiddev.cctweaks.api.lua.CCTweaksPlugin;
-import org.squiddev.cctweaks.api.lua.ILuaAPI;
-import org.squiddev.cctweaks.api.lua.ILuaAPIFactory;
-import org.squiddev.cctweaks.api.lua.ILuaEnvironment;
+import org.squiddev.cctweaks.api.lua.*;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.lib.cobalt.CobaltFactory;
 import org.squiddev.cctweaks.lua.lib.luaj.LuaJFactory;
@@ -21,7 +17,7 @@ public class ApiRegister {
 
 		environment.registerAPI(new ILuaAPIFactory() {
 			@Override
-			public ILuaAPI create(IComputerAccess computer) {
+			public ILuaAPI create(IExtendedComputerAccess computer) {
 				return Config.APIs.Socket.enabled ? new SocketAPI(computer) : null;
 			}
 

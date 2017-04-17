@@ -1,7 +1,5 @@
 package org.squiddev.cctweaks.api.lua;
 
-import dan200.computercraft.api.peripheral.IComputerAccess;
-
 /**
  * Create an instance of {@link ILuaAPI} for a given computer
  */
@@ -12,7 +10,7 @@ public interface ILuaAPIFactory {
 	 * @param computer The computer to create for
 	 * @return The created API.
 	 */
-	ILuaAPI create(IComputerAccess computer);
+	ILuaAPI create(IExtendedComputerAccess computer);
 
 	/**
 	 * Globals to export this API as
