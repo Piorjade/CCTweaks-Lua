@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -89,7 +90,11 @@ public abstract class AbstractSocketConnection implements ILuaObjectWithArgument
 					address.get();
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
-					throw LuaHelpers.rewriteException(cause != null ? cause : e, "Socket error");
+					if (cause instanceof UnknownHostException) {
+						throw new LuaException("Cannot resolve host " + cause.getMessage());
+					} else {
+						throw LuaHelpers.rewriteException(cause != null ? cause : e, "Socket error");
+					}
 				}
 				isResolved = true;
 				return channel.finishConnect();

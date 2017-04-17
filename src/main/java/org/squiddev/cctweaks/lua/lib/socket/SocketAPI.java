@@ -13,6 +13,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 
+import static org.squiddev.cctweaks.lua.lib.ArgumentHelper.getString;
+import static org.squiddev.cctweaks.lua.lib.ArgumentHelper.optInt;
+
 public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 	protected final HashSet<AbstractSocketConnection> connections = new HashSet<AbstractSocketConnection>();
 	private final IComputerAccess computer;
@@ -49,20 +52,8 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 	public Object[] callMethod(ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0: {
-				if (arguments.length == 0 || !(arguments[0] instanceof String)) {
-					throw new LuaException("Expected string");
-				}
-				String address = (String) arguments[0];
-				int port = -1;
-
-				if (arguments.length >= 2) {
-					Object val = arguments[1];
-					if (val instanceof Number) {
-						port = ((Number) val).intValue();
-					} else {
-						throw new LuaException("Expected string, number");
-					}
-				}
+				String address = getString(arguments, 0);
+				int port = optInt(arguments, 1, -1);
 
 				if (!Config.APIs.Socket.enabled) throw new LuaException("TCP connections are disabled");
 				if (connections.size() >= Config.APIs.Socket.maxTcpConnections) {

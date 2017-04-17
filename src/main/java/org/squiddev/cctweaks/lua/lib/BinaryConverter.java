@@ -1,7 +1,5 @@
 package org.squiddev.cctweaks.lua.lib;
 
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -69,9 +67,9 @@ public class BinaryConverter {
 	public static byte[] toBytes(String string) {
 		byte[] chars = new byte[string.length()];
 
-		for(int i = 0; i < chars.length; ++i) {
+		for (int i = 0; i < chars.length; ++i) {
 			char c = string.charAt(i);
-			chars[i] = c < 256?(byte)c:63;
+			chars[i] = c < 256 ? (byte) c : 63;
 		}
 
 		return chars;

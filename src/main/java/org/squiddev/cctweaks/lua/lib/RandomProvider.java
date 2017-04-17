@@ -19,14 +19,9 @@ public final class RandomProvider {
 		SecureRandom random = this.random;
 		if (random == null) {
 			try {
-			try {
 				random = SecureRandom.getInstance("SHA1PRNG");
 			} catch (NoSuchAlgorithmException e) {
 				random = new SecureRandom();
-			}
-			} catch(Throwable e) {
-				e.printStackTrace();
-				throw new RuntimeException(e.getMessage());
 			}
 			this.random = random;
 		}

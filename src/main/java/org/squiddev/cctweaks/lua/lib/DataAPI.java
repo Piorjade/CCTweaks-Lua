@@ -13,6 +13,8 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
+import static org.squiddev.cctweaks.lua.lib.ArgumentHelper.getString;
+
 /**
  * Adds inflate/deflate APIs
  */
@@ -45,21 +47,14 @@ public class DataAPI implements ILuaAPI, ILuaObjectWithArguments, ILuaAPIFactory
 		return new String[]{"data"};
 	}
 
-
-	public byte[] getStringBytes(Object[] args) throws LuaException {
-		if (args.length == 0 || !(args[0] instanceof String)) throw new LuaException("Expected string");
-
-		return BinaryConverter.toBytes((String) args[0]);
-	}
-
 	@Override
 	public Object[] callMethod(ILuaContext context, int method, Object[] args) throws LuaException, InterruptedException {
 		switch (method) {
 			case 0:
-				return inflate(getStringBytes(args));
+				return inflate(BinaryConverter.toBytes(getString(args, 0)));
 
 			case 1:
-				return deflate(getStringBytes(args));
+				return deflate(BinaryConverter.toBytes(getString(args, 0)));
 		}
 
 		return null;
