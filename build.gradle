@@ -59,7 +59,6 @@ sourceSets.test.compileClasspath += configurations.provided
 idea { module { scopes.PROVIDED.plus += [configurations.provided] } }
 
 def versions = [
-	('1.75')   : 'https://addons-origin.cursecdn.com/files/2269/339/ComputerCraft1.75.jar',
 	('1.78')   : 'https://addons-origin.cursecdn.com/files/2275/878/ComputerCraft1.78.jar',
 	('1.79')   : 'https://addons-origin.cursecdn.com/files/2291/384/ComputerCraft1.79.jar',
 	('1.80pr0'): 'https://addons-origin.cursecdn.com/files/2311/39/ComputerCraft1.80pr0.jar',
