@@ -121,7 +121,7 @@ public final class BigIntegerValue extends LuaValue {
 		env.rawset(NAME, BigIntegerFunction.makeTable(env));
 	}
 
-	private static BigInteger getValue(LuaValue value) {
+	private static BigInteger getValue(LuaValue value) throws LuaError {
 		if (value instanceof BigIntegerValue) {
 			return ((BigIntegerValue) value).number;
 		} else if (value.type() == TSTRING) {
@@ -157,7 +157,7 @@ public final class BigIntegerValue extends LuaValue {
 		}
 
 		@Override
-		public LuaValue call(LuaState state, LuaValue left, LuaValue right, LuaValue third) {
+		public LuaValue call(LuaState state, LuaValue left, LuaValue right, LuaValue third) throws LuaError {
 			try {
 				switch (opcode) {
 					case 0: { // unm

@@ -10,6 +10,7 @@ import org.squiddev.cctweaks.api.lua.ArgumentDelegator;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.lib.AbstractLuaContext;
 import org.squiddev.cobalt.*;
+import org.squiddev.cobalt.compiler.CompileException;
 import org.squiddev.cobalt.compiler.LoadState;
 import org.squiddev.cobalt.debug.DebugFrame;
 import org.squiddev.cobalt.debug.DebugHandler;
@@ -58,7 +59,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 			private boolean hasSoftAbort;
 
 			@Override
-			public void onInstruction(DebugState ds, DebugFrame di, int pc, Varargs extras, int top) {
+			public void onInstruction(DebugState ds, DebugFrame di, int pc, Varargs extras, int top) throws LuaError {
 				int count = ++this.count;
 				if (count > 100000) {
 					if (hardAbort != null) LuaThread.yield(state, NONE);
@@ -71,12 +72,12 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 			}
 
 			@Override
-			public void poll() {
+			public void poll() throws LuaError {
 				if (hardAbort != null) LuaThread.yield(state, NONE);
 				if (Config.Computer.timeoutError) handleSoftAbort();
 			}
 
-			public void handleSoftAbort() {
+			private void handleSoftAbort() throws LuaError {
 				// If the soft abort has been cleared then we can reset our flags and continue.
 				String message = softAbort;
 				if (message == null) {
@@ -120,7 +121,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 
 		globals.rawset("_CC_VERSION", valueOf(ComputerCraft.getVersion()));
 		globals.rawset("_MC_VERSION", valueOf(Config.mcVersion));
-		globals.rawset("_LUAJ_VERSION", valueOf("Cobalt 0.2.1"));
+		globals.rawset("_LUAJ_VERSION", valueOf("Cobalt 0.2.3"));
 		if (ComputerCraft.disable_lua51_features) {
 			globals.rawset("_CC_DISABLE_LUA51_FEATURES", Constants.TRUE);
 		}
@@ -148,7 +149,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 		try {
 			LuaFunction value = LoadState.load(state, bios, "@bios.lua", globals);
 			mainThread = new LuaThread(state, value, globals);
-		} catch (LuaError e) {
+		} catch (CompileException e) {
 			if (mainThread != null) {
 				state.abandon();
 				mainThread = null;
@@ -248,7 +249,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 			final int method = i;
 			result.rawset(methods[i], new VarArgFunction() {
 				@Override
-				public Varargs invoke(LuaState state, Varargs args) {
+				public Varargs invoke(LuaState state, Varargs args) throws LuaError {
 					if (!Config.Computer.timeoutError) {
 						String message = softAbort;
 						if (message != null) {
@@ -347,7 +348,7 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 		private static final LuaString EQ_STR = valueOf("=");
 
 		@Override
-		public Varargs invoke(LuaState state, Varargs args) {
+		public Varargs invoke(LuaState state, Varargs args) throws LuaError {
 			switch (opcode) {
 				case 0: // "load", // ( func [,chunkname] ) -> chunk | nil, msg
 				{
@@ -387,11 +388,22 @@ public class CobaltMachine extends AbstractLuaContext implements ILuaMachine {
 		@Override
 		public int read() throws IOException {
 			if (remaining <= 0) {
-				LuaValue s = OperationHelper.call(state, func);
+				LuaValue s;
+				try {
+					s = OperationHelper.call(state, func);
+				} catch (LuaError e) {
+					throw new IOException(e);
+				}
+
 				if (s.isNil()) {
 					return -1;
 				}
-				LuaString ls = s.strvalue();
+				LuaString ls;
+				try {
+					ls = s.strvalue();
+				} catch (LuaError e) {
+					throw new IOException(e);
+				}
 				bytes = ls.bytes;
 				offset = ls.offset;
 				remaining = ls.length;

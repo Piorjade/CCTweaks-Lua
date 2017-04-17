@@ -42,7 +42,7 @@ dependencies {
 	shade "org.ow2.asm:asm-debug-all:5.0.4"
 
 	shade 'org.squiddev:Patcher:1.2.3'
-	shade 'org.squiddev:Cobalt:0.2.1' // Remember to bump this in CobaltMachine too
+	shade 'org.squiddev:Cobalt:0.2.3' // Remember to bump this in CobaltMachine too
 
 	patch('org.squiddev:luaj.luajc:1.0.9') {
 		// We provide a custom LuaJ source with ComputerCraft
@@ -153,7 +153,7 @@ publishing {
 
 gradle.projectsEvaluated {
 	tasks.withType(JavaCompile) {
-		options.compilerArgs << "-Xlint"
+		options.compilerArgs << "-Xlint" << "-Xlint:-processing"
 	}
 
 	tasks.withType(Jar) {

@@ -1,10 +1,7 @@
 package org.squiddev.cctweaks.lua.lib.cobalt;
 
 import org.squiddev.cctweaks.lua.lib.luaj.LuaJConverter;
-import org.squiddev.cobalt.LuaString;
-import org.squiddev.cobalt.LuaTable;
-import org.squiddev.cobalt.LuaValue;
-import org.squiddev.cobalt.Varargs;
+import org.squiddev.cobalt.*;
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -50,12 +47,18 @@ public class CobaltConverter {
 				}
 
 				Map<Object, Object> table = new HashMap<Object, Object>();
-				LuaTable luaValue = value.checkTable();
+				LuaTable luaValue = (LuaTable) value;
 				tables.put(value, table);
 
 				LuaValue k = NIL;
 				while (true) {
-					Varargs keyValue = luaValue.next(k);
+					Varargs keyValue;
+					try {
+						keyValue = luaValue.next(k);
+					} catch (LuaError luaError) {
+						break;
+					}
+
 					k = keyValue.first();
 					if (k.isNil()) break;
 
