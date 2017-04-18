@@ -72,7 +72,6 @@ public abstract class AbstractConnection implements ILuaObjectWithArguments, IMe
 				address.get();
 			} catch (ExecutionException e) {
 				Throwable cause = e.getCause();
-				cause.printStackTrace();
 				if (cause instanceof UnknownHostException) {
 					throw new LuaException("Cannot resolve host " + cause.getMessage());
 				} else {

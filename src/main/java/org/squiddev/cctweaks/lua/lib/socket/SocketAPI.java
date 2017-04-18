@@ -100,17 +100,11 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 					throw new LuaException("Too many open connections");
 				}
 
-				URI uri = checkUri((String) arguments[0], 1);
-
-				String scheme = uri.getScheme();
-				if (scheme == null) {
-					scheme = "ws";
-				} else if (!scheme.equalsIgnoreCase("wss") && !scheme.equalsIgnoreCase("ws")) {
-					throw new LuaException("Invalid scheme " + scheme);
-				}
+				URI uri = checkWebsocketUri((String) arguments[0]);
 
 				int port = uri.getPort();
 				if (port < 0) {
+					String scheme = uri.getScheme();
 					if (scheme.equalsIgnoreCase("ws")) {
 						port = 80;
 					} else if (scheme.equalsIgnoreCase("wss")) {
@@ -136,7 +130,7 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 		}
 	}
 
-	private URI checkUri(String address, int port) throws LuaException {
+	private static URI checkUri(String address, int port) throws LuaException {
 		try {
 			URI parsed = new URI(address);
 			if (parsed.getHost() != null && (parsed.getPort() >= 0 || port >= 0)) {
@@ -146,7 +140,7 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 		}
 
 		try {
-			URI simple = new URI("oc://" + address);
+			URI simple = new URI("cc://" + address);
 			if (simple.getHost() != null) {
 				if (simple.getPort() >= 0) {
 					return simple;
@@ -158,6 +152,36 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 		}
 
 		throw new LuaException("Address could not be parsed or no valid port given");
+	}
+
+	private static URI checkWebsocketUri(String address) throws LuaException {
+		URI uri = null;
+		try {
+			uri = new URI(address);
+		} catch (URISyntaxException ignored) {
+		}
+
+		if (uri == null || uri.getHost() == null) {
+			try {
+				uri = new URI("ws://" + address);
+			} catch (URISyntaxException ignored) {
+			}
+		}
+
+		if (uri == null || uri.getHost() == null) throw new LuaException("Address could not be parsed");
+
+		String scheme = uri.getScheme();
+		if (scheme == null) {
+			try {
+				uri = new URI("ws://" + uri.toString());
+			} catch (URISyntaxException e) {
+				throw new LuaException("Cannot determine scheme");
+			}
+		} else if (!scheme.equalsIgnoreCase("wss") && !scheme.equalsIgnoreCase("ws")) {
+			throw new LuaException("Invalid scheme " + scheme);
+		}
+
+		return uri;
 	}
 
 	@Override

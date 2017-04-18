@@ -96,12 +96,11 @@ public class WebSocketConnection extends AbstractConnection {
 	}
 
 	@Override
-	public boolean checkConnected() throws LuaException, InterruptedException {
+	protected boolean checkConnected() throws LuaException, InterruptedException {
 		if (!super.checkConnected()) return false;
 
 		if (!channelFuture.isDone()) return false;
 		if (!channelFuture.isSuccess()) {
-			channelFuture.cause().printStackTrace();
 			throw LuaHelpers.rewriteException(channelFuture.cause(), "Cannot open socket");
 		}
 
