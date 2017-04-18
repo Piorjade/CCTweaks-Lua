@@ -101,10 +101,29 @@ public class SocketAPI implements ILuaAPI, IMethodDescriptor {
 				}
 
 				URI uri = checkUri((String) arguments[0], 1);
+
+				String scheme = uri.getScheme();
+				if (scheme == null) {
+					scheme = "ws";
+				} else if (!scheme.equalsIgnoreCase("wss") && !scheme.equalsIgnoreCase("ws")) {
+					throw new LuaException("Invalid scheme " + scheme);
+				}
+
+				int port = uri.getPort();
+				if (port < 0) {
+					if (scheme.equalsIgnoreCase("ws")) {
+						port = 80;
+					} else if (scheme.equalsIgnoreCase("wss")) {
+						port = 443;
+					} else {
+						throw new LuaException("Invalid scheme " + scheme);
+					}
+				}
+
 				try {
 					WebSocketConnection connection = new WebSocketConnection(this, computer, id++);
 					connection.setHeaders(headers);
-					connection.open(uri, uri.getPort());
+					connection.open(uri, port);
 					connections.add(connection);
 					return new Object[]{connection};
 				} catch (IOException e) {

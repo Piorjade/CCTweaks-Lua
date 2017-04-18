@@ -2,6 +2,7 @@ package org.squiddev.cctweaks.lua.asm;
 
 import org.objectweb.asm.ClassReader;
 import org.squiddev.cctweaks.lua.Config;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 import org.squiddev.patcher.transformer.ClassReplacer;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ import java.io.IOException;
  */
 public class CustomThreading extends ClassReplacer {
 	public CustomThreading() {
-		super(
+		super(TweaksLogger.instance,
 			"dan200.computercraft.core.computer.ComputerThread",
 			"org.squiddev.cctweaks.lua.patch.ComputerThread_Rewrite"
 		);

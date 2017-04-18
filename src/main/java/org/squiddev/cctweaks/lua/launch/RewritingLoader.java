@@ -1,8 +1,8 @@
 package org.squiddev.cctweaks.lua.launch;
 
 import org.squiddev.cctweaks.lua.StreamHelpers;
-import org.squiddev.cctweaks.lua.asm.CustomChain;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
+import org.squiddev.patcher.transformer.TransformationChain;
 
 import java.io.*;
 import java.net.JarURLConnection;
@@ -21,7 +21,7 @@ import java.util.jar.JarFile;
 public class RewritingLoader extends URLClassLoader {
 	private ClassLoader parent = getClass().getClassLoader();
 
-	public final CustomChain chain = new CustomChain();
+	public final TransformationChain chain = new TransformationChain();
 
 	private Set<String> classLoaderExceptions = new HashSet<String>();
 	private final File dumpFolder;
@@ -112,7 +112,7 @@ public class RewritingLoader extends URLClassLoader {
 
 	public void loadChain() throws Exception {
 		loadClass("org.squiddev.cctweaks.lua.asm.Tweaks")
-			.getMethod("setup", CustomChain.class)
+			.getMethod("setup", TransformationChain.class)
 			.invoke(null, chain);
 	}
 
@@ -154,17 +154,17 @@ public class RewritingLoader extends URLClassLoader {
 					try {
 						stream.write(bytes);
 					} catch (IOException e) {
-						Logger.error("Cannot write " + file, e);
+						TweaksLogger.error("Cannot write " + file, e);
 					} finally {
 						stream.close();
 					}
 				} catch (FileNotFoundException e) {
-					Logger.error("Cannot write " + file, e);
+					TweaksLogger.error("Cannot write " + file, e);
 				} catch (IOException e) {
-					Logger.error("Cannot write " + file, e);
+					TweaksLogger.error("Cannot write " + file, e);
 				}
 			} else {
-				Logger.warn("Cannot create folder for " + file);
+				TweaksLogger.warn("Cannot create folder for " + file);
 			}
 		}
 	}

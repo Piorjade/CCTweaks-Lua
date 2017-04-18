@@ -8,7 +8,7 @@ import org.luaj.vm2.lib.DebugLib;
 import org.squiddev.cctweaks.api.lua.IExtendedLuaMachine;
 import org.squiddev.cctweaks.api.lua.ILuaMachineFactory;
 import org.squiddev.cctweaks.lua.Config;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,14 +56,14 @@ public class LuaJFactory implements ILuaMachineFactory<LuaJFactory.LuaJMachine> 
 				getGlobals = LuaJLuaMachine.class.getDeclaredField("m_globals");
 				getGlobals.setAccessible(true);
 			} catch (NoSuchFieldException e) {
-				Logger.error("Cannot load LuaJLuaMachine.m_globals", e);
+				TweaksLogger.error("Cannot load LuaJLuaMachine.m_globals", e);
 			}
 
 			try {
 				toValue = LuaJLuaMachine.class.getDeclaredMethod("toValue", Object.class);
 				toValue.setAccessible(true);
 			} catch (NoSuchMethodException e) {
-				Logger.error("Cannot load LuaJLuaMachine.toValue", e);
+				TweaksLogger.error("Cannot load LuaJLuaMachine.toValue", e);
 			}
 		}
 
@@ -75,7 +75,7 @@ public class LuaJFactory implements ILuaMachineFactory<LuaJFactory.LuaJMachine> 
 			try {
 				return (LuaTable) getGlobals.get(this);
 			} catch (IllegalAccessException e) {
-				Logger.error("Cannot get LuaJLuaMachine.m_globals", e);
+				TweaksLogger.error("Cannot get LuaJLuaMachine.m_globals", e);
 				return null;
 			}
 		}
@@ -88,7 +88,7 @@ public class LuaJFactory implements ILuaMachineFactory<LuaJFactory.LuaJMachine> 
 				try {
 					converted = (LuaValue) toValue.invoke(this, object);
 				} catch (Exception e) {
-					Logger.error("Cannot call LuaJLuaMachine.toValue", e);
+					TweaksLogger.error("Cannot call LuaJLuaMachine.toValue", e);
 					converted = LuaValue.NIL;
 				}
 

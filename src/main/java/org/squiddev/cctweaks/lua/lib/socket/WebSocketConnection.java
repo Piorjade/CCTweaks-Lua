@@ -12,8 +12,8 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.handler.ssl.SslContext;
 import io.netty.util.CharsetUtil;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 import org.squiddev.cctweaks.lua.lib.LuaHelpers;
-import org.squiddev.patcher.Logger;
 
 import javax.net.ssl.TrustManagerFactory;
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class WebSocketConnection extends AbstractConnection {
 				tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 				tmf.init((KeyStore) null);
 			} catch (Exception e) {
-				Logger.error("Cannot setup trust manager", e);
+				TweaksLogger.error("Cannot setup trust manager", e);
 			}
 
 			return trustManager = tmf;
@@ -61,25 +61,11 @@ public class WebSocketConnection extends AbstractConnection {
 	}
 
 	@Override
-	protected InetSocketAddress connect(final URI uri, int cPort) throws Exception {
-		String scheme = uri.getScheme();
-		if (scheme == null) scheme = "ws";
-
-		final int port;
-		if (cPort >= 0) {
-			port = cPort;
-		} else if (scheme.equalsIgnoreCase("ws")) {
-			port = 80;
-		} else if (scheme.equalsIgnoreCase("wss")) {
-			port = 443;
-		} else {
-			port = -1;
-		}
-
+	protected InetSocketAddress connect(final URI uri, final int port) throws Exception {
 		InetSocketAddress address = super.connect(uri, port);
 
 		final SslContext ssl;
-		if (scheme.equalsIgnoreCase("wss")) {
+		if (uri.getScheme().equalsIgnoreCase("wss")) {
 			ssl = SslContext.newClientContext(getTrustManager());
 		} else {
 			ssl = null;

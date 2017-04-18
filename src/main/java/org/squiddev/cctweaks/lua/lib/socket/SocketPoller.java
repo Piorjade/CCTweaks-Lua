@@ -4,7 +4,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
@@ -42,7 +42,7 @@ public class SocketPoller implements Runnable {
 		try {
 			selector = Selector.open();
 		} catch (IOException e) {
-			Logger.error("Cannot run SocketPoller: sockets will not work as expected", e);
+			TweaksLogger.error("Cannot run SocketPoller: sockets will not work as expected", e);
 		}
 		this.selector = selector;
 		if (selector == null) return;
@@ -76,7 +76,7 @@ public class SocketPoller implements Runnable {
 					}
 				}
 			} catch (IOException e) {
-				Logger.error("Error in SocketPoller: running another iteration", e);
+				TweaksLogger.error("Error in SocketPoller: running another iteration", e);
 			}
 		}
 	}

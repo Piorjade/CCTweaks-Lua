@@ -7,10 +7,10 @@ import org.squiddev.cctweaks.api.lua.ILuaMachineFactory;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.Semaphore;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 import org.squiddev.cctweaks.lua.lib.ComputerMonitor;
 import org.squiddev.cctweaks.lua.lib.LuaEnvironment;
 import org.squiddev.cctweaks.lua.patch.iface.ComputerPatched;
-import org.squiddev.patcher.Logger;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -71,7 +71,7 @@ public class ComputerThread_Rewrite {
 		synchronized (stateLock) {
 			ILuaMachineFactory<?> factory = LuaEnvironment.getUsedMachine();
 			if (!factory.supportsMultithreading() && Config.Computer.MultiThreading.threads > 1) {
-				Logger.warn("Can only have 1 thread when running on " + factory.getID() + " runtime, reverting to default");
+				TweaksLogger.warn("Can only have 1 thread when running on " + factory.getID() + " runtime, reverting to default");
 				Config.Computer.MultiThreading.threads = 1;
 			}
 
@@ -244,13 +244,13 @@ public class ComputerThread_Rewrite {
 					try {
 						task.execute();
 					} catch (Throwable e) {
-						Logger.error("ComputerCraft: Error running task.", e);
+						TweaksLogger.error("ComputerCraft: Error running task.", e);
 					}
 					task = null;
 					finished.signal();
 				}
 			} catch (InterruptedException e) {
-				Logger.error("ComputerCraft: Error running thread.", e);
+				TweaksLogger.error("ComputerCraft: Error running thread.", e);
 			}
 		}
 

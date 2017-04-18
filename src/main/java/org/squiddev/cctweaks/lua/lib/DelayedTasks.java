@@ -5,7 +5,7 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import org.squiddev.cctweaks.api.lua.IExtendedLuaTask;
 import org.squiddev.cctweaks.api.lua.ILuaEnvironment;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 
 /**
  * Delaying version of {@link dan200.computercraft.core.computer.MainThread}.
@@ -151,7 +151,7 @@ public class DelayedTasks {
 
 		public boolean update() {
 			if (remaining < 0) {
-				Logger.warn("Task has negative time remaining!");
+				TweaksLogger.warn("Task has negative time remaining!");
 				return true;
 			}
 
@@ -163,7 +163,7 @@ public class DelayedTasks {
 				} catch (LuaException e) {
 					yieldFailure(e.getMessage());
 				} catch (Throwable e) {
-					Logger.error("Error in task: ", e);
+					TweaksLogger.error("Error in task: ", e);
 					yieldFailure("Java Exception Thrown: " + e.toString());
 				}
 
@@ -177,7 +177,7 @@ public class DelayedTasks {
 					} catch (LuaException e) {
 						yieldFailure(e.getMessage());
 					} catch (Throwable e) {
-						Logger.error("Error in task: ", e);
+						TweaksLogger.error("Error in task: ", e);
 						yieldFailure("Java Exception Thrown: " + e.toString());
 					}
 				}

@@ -43,6 +43,11 @@ public final class ArgumentHelper {
 		return new LuaException("Expected " + expected + " for argument " + (index + 1) + ", got " + getType(object));
 	}
 
+	@Nonnull
+	public static LuaException badKey(@Nullable Object object, Object key, @Nonnull String expected) {
+		return new LuaException("Expected " + expected + " for key " + key + ", got " + getType(object));
+	}
+
 	public static double getNumber(@Nonnull Object[] args, int index) throws LuaException {
 		Object value = index < args.length ? args[index] : null;
 		if (value instanceof Number) {
@@ -52,8 +57,21 @@ public final class ArgumentHelper {
 		}
 	}
 
+	public static double getNumber(@Nonnull Map<?, ?> args, Object key) throws LuaException {
+		Object value = args.get(key);
+		if (value instanceof Number) {
+			return ((Number) value).doubleValue();
+		} else {
+			throw badKey(value, key, "number");
+		}
+	}
+
 	public static int getInt(@Nonnull Object[] args, int index) throws LuaException {
 		return (int) getNumber(args, index);
+	}
+
+	public static int getInt(@Nonnull Map<?, ?> args, Object key) throws LuaException {
+		return (int) getNumber(args, key);
 	}
 
 	public static boolean getBoolean(@Nonnull Object[] args, int index) throws LuaException {
@@ -72,6 +90,16 @@ public final class ArgumentHelper {
 			return (String) value;
 		} else {
 			throw badArgument(value, index, "string");
+		}
+	}
+
+	@Nonnull
+	public static String getString(@Nonnull Map<?, ?> args, Object key) throws LuaException {
+		Object value = args.get(key);
+		if (value instanceof String) {
+			return (String) value;
+		} else {
+			throw badKey(value, key, "string");
 		}
 	}
 
@@ -155,6 +183,17 @@ public final class ArgumentHelper {
 		}
 	}
 
+	public static String optString(@Nonnull Map<?, ?> args, Object key, String def) throws LuaException {
+		Object value = args.get(key);
+		if (value == null) {
+			return def;
+		} else if (value instanceof String) {
+			return (String) value;
+		} else {
+			throw badKey(value, key, "string");
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@Nonnull
 	public static <T extends Enum<T>> T optEnum(@Nonnull Object[] args, int index, Class<T> klass, T def) throws LuaException {
@@ -174,6 +213,18 @@ public final class ArgumentHelper {
 			return (Map<Object, Object>) value;
 		} else {
 			throw badArgument(value, index, "table");
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<Object, Object> optTable(@Nonnull Map<?, ?> args, Object key, Map<Object, Object> def) throws LuaException {
+		Object value = args.get(key);
+		if (value == null) {
+			return def;
+		} else if (value instanceof Map) {
+			return (Map<Object, Object>) value;
+		} else {
+			throw badKey(value, key, "table");
 		}
 	}
 

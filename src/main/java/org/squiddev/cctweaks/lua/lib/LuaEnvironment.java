@@ -19,7 +19,7 @@ import dan200.computercraft.core.filesystem.FileSystemException;
 import dan200.computercraft.core.lua.ILuaMachine;
 import org.squiddev.cctweaks.api.lua.*;
 import org.squiddev.cctweaks.lua.Config;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -131,7 +131,7 @@ public class LuaEnvironment implements ILuaEnvironment {
 	public static ILuaMachineFactory<?> getUsedMachine() {
 		ILuaMachineFactory<?> factory = instance.machines.get(Config.Computer.runtime);
 		if (factory == null) {
-			Logger.warn("Unknown runtime '" + Config.Computer.runtime + "', falling back to luaj");
+			TweaksLogger.warn("Unknown runtime '" + Config.Computer.runtime + "', falling back to luaj");
 			factory = instance.machines.get("luaj");
 
 			if (factory == null) throw new IllegalStateException("Cannot find any runtime");

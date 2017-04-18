@@ -2,7 +2,7 @@ package org.squiddev.cctweaks.lua.lib;
 
 import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.api.lua.LuaException;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -165,7 +165,7 @@ public class HTTPRequest {
 						result = null;
 					}
 				} catch (Exception e) {
-					Logger.error("Unknown exception fetching " + url, e);
+					TweaksLogger.error("Unknown exception fetching " + url, e);
 					synchronized (lock) {
 						complete = true;
 						success = false;

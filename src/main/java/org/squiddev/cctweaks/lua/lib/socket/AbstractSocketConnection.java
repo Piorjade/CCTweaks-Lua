@@ -2,8 +2,8 @@ package org.squiddev.cctweaks.lua.lib.socket;
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 import org.squiddev.cctweaks.lua.lib.LuaHelpers;
-import org.squiddev.patcher.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -34,7 +34,7 @@ public abstract class AbstractSocketConnection extends AbstractConnection {
 			try {
 				channel.close();
 			} catch (IOException e) {
-				Logger.error("Cannot close socket", e);
+				TweaksLogger.error("Cannot close socket", e);
 			}
 			channel = null;
 		}

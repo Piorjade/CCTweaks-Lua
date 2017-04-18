@@ -22,7 +22,7 @@
 package org.squiddev.cctweaks.lua.lib.socket;
 
 import com.google.common.net.InetAddresses;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -75,7 +75,7 @@ public class AddressMatcher {
 					addresses.add(InetAddress.getByName(host));
 				}
 			} catch (Exception e) {
-				Logger.error("Error adding " + host + " to blacklist/whitelist", e);
+				TweaksLogger.error("Error adding " + host + " to blacklist/whitelist", e);
 			}
 		}
 

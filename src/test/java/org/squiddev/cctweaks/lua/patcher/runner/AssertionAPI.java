@@ -8,7 +8,7 @@ import org.junit.Assert;
 import org.squiddev.cctweaks.api.lua.IArguments;
 import org.squiddev.cctweaks.api.lua.ILuaObjectWithArguments;
 import org.squiddev.cctweaks.api.lua.IMethodDescriptor;
-import org.squiddev.patcher.Logger;
+import org.squiddev.cctweaks.lua.TweaksLogger;
 
 import javax.annotation.Nonnull;
 
@@ -82,7 +82,7 @@ public class AssertionAPI implements ILuaAPI, ILuaObjectWithArguments, IMethodDe
 					for (int i = 0; i < objects.length; i++) {
 						buffer.append(getMessage(objects, i)).append("\t");
 					}
-					Logger.debug(buffer.toString());
+					TweaksLogger.debug(buffer.toString());
 					return null;
 				}
 				case 3:

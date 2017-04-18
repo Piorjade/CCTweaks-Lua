@@ -2,7 +2,6 @@ package org.squiddev.cctweaks.lua;
 
 import org.squiddev.cctweaks.lua.lib.socket.AddressMatcher;
 import org.squiddev.configgen.*;
-import org.squiddev.patcher.Logger;
 
 /**
  * The main config class
@@ -14,19 +13,19 @@ public final class Config {
 	@OnSync
 	public static void sync() {
 		if (!Computer.biosPath.startsWith("/")) {
-			Logger.warn("bios path (" + Computer.biosPath + ") does not start with '/', reverting to default");
+			TweaksLogger.warn("bios path (" + Computer.biosPath + ") does not start with '/', reverting to default");
 			Computer.biosPath = BIOS_PATH;
 		} else if (Config.class.getResource(Computer.biosPath) == null) {
-			Logger.warn("Cannot find custom bios (" + Computer.biosPath + "), reverting to default");
+			TweaksLogger.warn("Cannot find custom bios (" + Computer.biosPath + "), reverting to default");
 			Computer.biosPath = BIOS_PATH;
 		}
 
 		if (Computer.preBiosPath != null && !Computer.preBiosPath.isEmpty()) {
 			if (!Computer.preBiosPath.startsWith("/")) {
-				Logger.warn("Pre-bios path (" + Computer.preBiosPath + ") does not start with '/', reverting to default");
+				TweaksLogger.warn("Pre-bios path (" + Computer.preBiosPath + ") does not start with '/', reverting to default");
 				Computer.preBiosPath = "";
 			} else if (Config.class.getResource(Computer.preBiosPath) == null) {
-				Logger.warn("Cannot find custom pre-bios (" + Computer.preBiosPath + "), reverting to default");
+				TweaksLogger.warn("Cannot find custom pre-bios (" + Computer.preBiosPath + "), reverting to default");
 				Computer.preBiosPath = "";
 			}
 		}

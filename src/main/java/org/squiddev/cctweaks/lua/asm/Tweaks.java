@@ -1,17 +1,15 @@
 package org.squiddev.cctweaks.lua.asm;
 
-import org.squiddev.patcher.transformer.ClassMerger;
-import org.squiddev.patcher.transformer.ClassReplacer;
-import org.squiddev.patcher.transformer.IPatcher;
-import org.squiddev.patcher.transformer.ISource;
+import org.squiddev.cctweaks.lua.TweaksLogger;
+import org.squiddev.patcher.transformer.*;
 
 /**
  * Setup everything
  */
 public class Tweaks {
-	public static void setup(CustomChain chain) {
-		chain.addPatchFile("org.luaj.vm2.lib.DebugLib");
-		chain.addPatchFile("org.luaj.vm2.lib.StringLib");
+	public static void setup(TransformationChain chain) {
+		chain.add(new ClassReplaceSource(TweaksLogger.instance, "org.luaj.vm2.lib.DebugLib"));
+		chain.add(new ClassReplaceSource(TweaksLogger.instance, "org.luaj.vm2.lib.StringLib"));
 
 		chain.add(new AddAdditionalData());
 		chain.add(new AddMethodDescriptor());
@@ -23,30 +21,30 @@ public class Tweaks {
 		chain.add(new LimitLabel());
 		chain.add(new WhitelistDebug());
 
-		chain.add(new ClassMerger(
+		chain.add(new ClassMerger(TweaksLogger.instance,
 			"dan200.computercraft.core.computer.Computer",
 			"org.squiddev.cctweaks.lua.patch.Computer_Patch"
 		));
 
-		chain.add(new ClassMerger(
+		chain.add(new ClassMerger(TweaksLogger.instance,
 			"dan200.computercraft.core.filesystem.FileSystem",
 			"org.squiddev.cctweaks.lua.patch.FileSystem_Patch"
 		));
 
-		chain.add(new ClassMerger(
+		chain.add(new ClassMerger(TweaksLogger.instance,
 			"dan200.computercraft.core.apis.HTTPAPI",
 			"org.squiddev.cctweaks.lua.patch.HTTPAPI_Patch"
 		));
 
 		// Binary patches
 		chain.add(new BinaryMachine());
-		chain.add(new ClassMerger("dan200.computercraft.core.apis.FSAPI", "org.squiddev.cctweaks.lua.patch.FSAPI_Patch"));
-		chain.add(new ClassMerger("dan200.computercraft.core.apis.PeripheralAPI", "org.squiddev.cctweaks.lua.patch.PeripheralAPI_Patch"));
-		chain.add(new ClassMerger("dan200.computercraft.core.apis.OSAPI", "org.squiddev.cctweaks.lua.patch.OSAPI_Patch"));
-		chain.add(new ClassMerger("dan200.computercraft.shared.peripheral.modem.ModemPeripheral", "org.squiddev.cctweaks.lua.patch.ModemPeripheral_Patch"));
+		chain.add(new ClassMerger(TweaksLogger.instance, "dan200.computercraft.core.apis.FSAPI", "org.squiddev.cctweaks.lua.patch.FSAPI_Patch"));
+		chain.add(new ClassMerger(TweaksLogger.instance, "dan200.computercraft.core.apis.PeripheralAPI", "org.squiddev.cctweaks.lua.patch.PeripheralAPI_Patch"));
+		chain.add(new ClassMerger(TweaksLogger.instance, "dan200.computercraft.core.apis.OSAPI", "org.squiddev.cctweaks.lua.patch.OSAPI_Patch"));
+		chain.add(new ClassMerger(TweaksLogger.instance, "dan200.computercraft.shared.peripheral.modem.ModemPeripheral", "org.squiddev.cctweaks.lua.patch.ModemPeripheral_Patch"));
 	}
 
-	private static void addMulti(CustomChain chain, ClassReplacer replacer) {
+	private static void addMulti(TransformationChain chain, ClassReplacer replacer) {
 		chain.add((IPatcher) replacer);
 		chain.add((ISource) replacer);
 	}
