@@ -1,5 +1,7 @@
 package org.squiddev.cctweaks.lua.lib.socket;
 
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import org.squiddev.cctweaks.lua.Config;
 import org.squiddev.cctweaks.lua.ThreadBuilder;
 import org.squiddev.patcher.Logger;
@@ -13,6 +15,7 @@ import java.util.concurrent.*;
 public class SocketPoller implements Runnable {
 	private static final ExecutorService threads = ThreadBuilder.createThread("Socket", Config.APIs.Socket.threads, ThreadBuilder.LOW_PRIORITY);
 	private static final ThreadFactory pollerFactory = ThreadBuilder.getFactory("Socket Poller", ThreadBuilder.LOW_PRIORITY);
+	private static final EventLoopGroup group = new NioEventLoopGroup(Config.APIs.Socket.nettyThreads, ThreadBuilder.getFactory("Netty", ThreadBuilder.LOW_PRIORITY));
 
 	private static final Object lock = new Object();
 	private static SocketPoller read;
@@ -103,5 +106,9 @@ public class SocketPoller implements Runnable {
 
 	public static <T> Future<T> submit(Callable<T> task) {
 		return threads.submit(task);
+	}
+
+	public static EventLoopGroup group() {
+		return group;
 	}
 }

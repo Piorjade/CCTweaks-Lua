@@ -19,7 +19,11 @@ public class ApiRegister {
 		environment.registerAPI(new ILuaAPIFactory() {
 			@Override
 			public ILuaAPI create(@Nonnull IExtendedComputerAccess computer) {
-				return Config.APIs.Socket.enabled ? new SocketAPI(computer) : null;
+				if (Config.APIs.Socket.tcp || Config.APIs.Socket.websocket) {
+					return new SocketAPI(computer);
+				} else {
+					return null;
+				}
 			}
 
 			@Nonnull

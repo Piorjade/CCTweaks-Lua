@@ -130,12 +130,17 @@ public final class Config {
 		public static final class Socket {
 			/**
 			 * Enable TCP connections.
-			 * When enabled, the socket API becomes available on
-			 * all computers.
 			 */
 			@DefaultBoolean(true)
 			@RequiresRestart(mc = false, world = true)
-			public static boolean enabled;
+			public static boolean tcp;
+
+			/**
+			 * Enable websockets.
+			 */
+			@DefaultBoolean(true)
+			@RequiresRestart(mc = false, world = true)
+			public static boolean websocket;
 
 			/**
 			 * Blacklisted domain names.
@@ -157,11 +162,11 @@ public final class Config {
 			public static AddressMatcher whitelist;
 
 			/**
-			 * Maximum TCP connections a computer can have at any time
+			 * Maximum connections a computer can have at any time
 			 */
 			@DefaultInt(4)
 			@Range(min = 1)
-			public static int maxTcpConnections;
+			public static int maxConnections;
 
 			/**
 			 * Number of threads to use for processing name lookups.
@@ -170,6 +175,14 @@ public final class Config {
 			@Range(min = 1)
 			@RequiresRestart
 			public static int threads;
+
+			/**
+			 * Number of threads to use for processing netty connections
+			 */
+			@DefaultInt(4)
+			@Range(min = 1)
+			@RequiresRestart
+			public static int nettyThreads;
 
 			/**
 			 * Maximum number of characters to read from a socket.
