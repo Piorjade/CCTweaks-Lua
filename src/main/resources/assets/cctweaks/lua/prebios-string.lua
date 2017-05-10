@@ -3,12 +3,28 @@ local function fail(msg)
 	term.setCursorBlink(false)
 	term.clear()
 	term.setCursorPos(1, 1)
-
+	local x, y = term.getSize()
 	-- Print some red text
 	if term.isColour() then term.setTextColour(16384) end
-	term.write(msg)
-
-	term.setCursorPos(1, 2)
+	
+	--Split the message into multiple parts if it's too long for the screen
+	local str = {}
+	local size
+	repeat
+		size = #msg
+		if size > x then
+			table.insert(str, string.sub(msg, 1, x))
+			msg = string.sub(msg, x+1)
+		else
+			table.insert(str, msg)
+			
+		end
+	until size <= x
+	for each, stri in ipairs(str) do
+		local cx, cy = term.getCursorPos()
+		term.write(stri)
+		term.setCursorPos(1, cy+1)
+	end
 	term.setTextColour(1)
 	term.write("Press any key to continue")
 
@@ -71,4 +87,12 @@ if native_getfenv then
 	end
 end
 
-return fun()
+-- Try to run the bios, print possible errors
+local _, ok, err = pcall(fun)
+if not _ then
+	fail(ok)
+elseif not ok then
+	fail(err)
+end
+
+return ok
